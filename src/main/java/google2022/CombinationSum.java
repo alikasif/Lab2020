@@ -16,12 +16,14 @@ public class CombinationSum {
             List<Integer> tmp = new LinkedList<>();
             tmp.addAll(res);
             tmp.add(arr[i]);
-            if (sum(tmp) >= t) {
-                System.out.println(tmp);
+            int st  = sum(tmp);
+            if ( st >= t) {
+                if (st == t)
+                    System.out.println(tmp);
                 return;
             }
             else {
-                if( sum(tmp) < t) {
+                if( st < t) {
                     cs(arr, t, tmp);
                 }
             }
