@@ -26,6 +26,7 @@ public class LongestSubStringWithoutRepetition {
                 }
                 last = tt+1;
             }
+
             map.put(c, i);
             maxl = Math.max(maxl, map.size());
         }
