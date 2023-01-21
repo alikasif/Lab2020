@@ -10,22 +10,18 @@ public class ReverseSLL {
         head.next.next = new Node(3);
         head.next.next.next = new Node(4);
         head.next.next.next.next = new Node(5);
-
-        Node c = head;
-        Node n = head.next;
-        c.next = null;
-
-        while ( n != null) {
-
-            Node t = n.next;
-            n.next = c;
-
-            c = n;
-            n = t;
+        // 1 -> 2 -> 3 -> 4 -> 5
+        Node prev = null;
+        Node current = head;
+        while (current != null) {
+           Node tmp = current.next;
+           current.next = prev;
+           prev = current;
+           current = tmp;
         }
-        while (c != null) {
-            System.out.println(c);
-            c = c.next;
+        while (prev != null) {
+            System.out.print(prev + " -> ");
+            prev = prev.next;
         }
     }
 }
