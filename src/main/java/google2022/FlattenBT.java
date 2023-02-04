@@ -4,7 +4,7 @@ import leetcode.Node;
 
 public class FlattenBT {
 
-    static Node tmp = null;
+    static Node prev = null;
 
     public static void main(String[] args) {
 
@@ -31,8 +31,8 @@ public class FlattenBT {
             return;
         flatten(root.right);
         flatten(root.left);
-        root.right = tmp;
+        root.right = prev;
         root.left = null;
-        tmp = root;
+        prev = root;
     }
 }

@@ -22,7 +22,7 @@ public class MaxPathSum {
         int ls = Math.max(0, maxPathSum(root.left));
         int rs = Math.max(0, maxPathSum(root.right));
 
-        int cs = root.value + ls +rs;
+        int cs = root.value + ls + rs;
 
         maxSum = Math.max(maxSum, cs);
         return root.value + Math.max(ls, rs);
