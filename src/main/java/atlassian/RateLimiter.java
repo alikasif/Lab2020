@@ -4,21 +4,26 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.TimeUnit;
 
 public class RateLimiter {
     public static void main(String[] args) {
+        //testTokenBucket();
+        // testLeakyBucket();
+        //testFixedWindow();
+        //testSlidingWindow();
         testSlidingWindowWithCounter();
     }
 
     static void testSlidingWindowWithCounter() {
         SlidingWindowCounter slidingWindowCounter = new SlidingWindowCounter(3, 10);
-        for(int i =0; i< 50; i++) {
-            long l = System.currentTimeMillis() / (500);
-            boolean allowed = slidingWindowCounter.isAllowed(String.valueOf(i), l);
+        int i=0;
+        while (true){
+            i++;
+            boolean allowed = slidingWindowCounter.isAllowed(String.valueOf(i), System.currentTimeMillis());
             System.out.println(allowed);
-            //System.out.println(l);
             try {
-                Thread.sleep(1000);
+                Thread.sleep(15 * 1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -36,7 +41,7 @@ public class RateLimiter {
             System.out.println(t);*/
 
         IRateLimiter rateLimiter = new SlidingWindow(3, 10*1000);
-        int i=0;
+        int i = 0;
         while (true) {
             try {
                 Thread.sleep(200);
@@ -52,20 +57,21 @@ public class RateLimiter {
         int i=0;
         while (true) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            System.out.println(rateLimiter.isAllowed(String.valueOf(++i), 0));
+            System.out.println(rateLimiter.isAllowed(String.valueOf(++i), System.currentTimeMillis()));
         }
     }
 
     static void testLeakyBucket() {
-        IRateLimiter rateLimiter = new LeakyBucket(3);
-        for(int i = 0; i<10; i++) {
-            System.out.println(rateLimiter.isAllowed(String.valueOf(i), 0));
+        IRateLimiter rateLimiter = new LeakyBucket(5, 2);
+        int i=0;
+        while (true){
+            System.out.println(rateLimiter.isAllowed(String.valueOf(i++), 0));
             try {
-                Thread.sleep(1000);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -73,11 +79,13 @@ public class RateLimiter {
     }
 
     static void testTokenBucket() {
-        IRateLimiter rateLimiter = new TokenBucket(3);
-        for(int i = 0; i<10; i++) {
-            System.out.println(rateLimiter.isAllowed(String.valueOf(i), 0));
+
+        IRateLimiter rateLimiter = new TokenBucket(3, 1);
+        int i=0;
+        while(true){
+            System.out.println(rateLimiter.isAllowed(String.valueOf(i++), 0));
             try {
-                Thread.sleep(2000);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -91,35 +99,55 @@ class SlidingWindowCounter implements IRateLimiter {
     int windowSize;
     long millisToGoBack;
     Map<Long, Integer> counter;
+    long currentWindow;
+    long prevWindow;
+    int capacity;
 
-    public SlidingWindowCounter(int b, long millisToGoBack) {
+    public SlidingWindowCounter(int capacity, long millisToGoBack) {
         counter = new HashMap<>();
+        this.capacity = capacity;
         this.millisToGoBack = millisToGoBack;
+        currentWindow= System.currentTimeMillis();
+        prevWindow = currentWindow - 60 *1000;
+
+        counter.put(currentWindow,0);
+        counter.put(prevWindow, 2);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true) {
+                    try {
+                        Thread.sleep(60 * 1000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    System.out.println("starting new window");
+                    prevWindow = currentWindow;
+                    currentWindow = System.currentTimeMillis();
+                    counter.put(currentWindow,0);
+                }
+            }
+        }).start();
     }
 
     @Override
     public boolean isAllowed(String s, long ts) {
-        System.out.println(counter);
-        long l = System.currentTimeMillis();
-        long millisTOGoBack = l - 12000;
-        //System.out.println(millisTOGoBack);
 
-        int r=0;
-        while ( l >= millisTOGoBack ) {
-            l = l - 4000;
-            if(counter.get(l) != null)
-                r+=counter.get(l);
-        }
+        long elapsedTime = ts - currentWindow;
+        Integer currentCount = counter.get(currentWindow);
+        int prevCount = counter.get(prevWindow);
 
-        if (r+1 < 10) {
-            long ll = System.currentTimeMillis() / (4 * 1000);// 4 sec window
-            Integer integer = counter.putIfAbsent(ll, 1);
-            if(integer != null)
-                counter.put(ll, integer+1);
+        long weightedCount = prevCount * (currentWindow-elapsedTime)/currentWindow;
+
+        System.out.println("current count " + currentCount + " for "+ currentWindow);
+        System.out.println("weighted count " + weightedCount + " for "+ prevWindow);
+
+        if(currentCount+weightedCount < capacity) {
+            counter.put(currentWindow, counter.get(currentWindow)+1);
             return true;
         }
-        else
-            return false;
+        return false;
     }
 }
 
@@ -137,20 +165,25 @@ class SlidingWindow implements IRateLimiter {
 
     @Override
     public boolean isAllowed(String s, long ts) {
+
         long oldestTS = ts - millisToGoBack;
+        System.out.println("will check until "+ oldestTS);
         int c = 0;
+
         for(long t : tsQueue) {
             if (t > oldestTS) {
-                System.out.println(t +" " + oldestTS);
+                System.out.println("request until "+ t +" are "+ c);
                 c++;
             }
             else {
-                System.out.println(t +" " + oldestTS);
+                System.out.println("breaking. request until "+ t +" are "+ c);
                 break;
             }
         }
-        if (c >= capacity)
+
+        if (c >= capacity) {
             return false;
+        }
         else {
             tsQueue.offerFirst(ts);
             return true;
@@ -163,20 +196,26 @@ class FixedWindow implements IRateLimiter {
     int requests;
     int capacity;
 
+    Map<Long, Integer> requestCounter;
+
+    /*
+        3 request per second. sleet every second and then reset the counter
+     */
     public FixedWindow(int capacity) {
         this.capacity = capacity;
+        this.requestCounter = new HashMap<>();
 
         new Thread(new Runnable() {
             @Override
             public void run() {
                 while (true) {
                     try {
-                        Thread.sleep(60 * 1000); // 0 seconds
+                        Thread.sleep(1000); // 1 seconds
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
                     currentTime = System.currentTimeMillis();
-                    requests = 0;
+                    requestCounter.put(TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()),0);
                 }
             }
         }).start();
@@ -184,20 +223,32 @@ class FixedWindow implements IRateLimiter {
 
     @Override
     public boolean isAllowed(String s, long ts) {
-        if (requests < capacity) {
-            requests++;
-            System.out.println(System.currentTimeMillis());
-            return  true;
+        //long timeInSeconds = ts / 1000;
+        long timeInSeconds = TimeUnit.MILLISECONDS.toSeconds(ts);
+        Integer currentReqCount = requestCounter.get(timeInSeconds);
+        if(currentReqCount == null) {
+            System.out.println("added new window "+ timeInSeconds + " count "+ currentReqCount);
+            requestCounter.put(timeInSeconds, 1);
+            return true;
         }
-        return false;
+        else if(currentReqCount < capacity) {
+            System.out.println("incremented count of window "+ timeInSeconds + " count "+ currentReqCount);
+            requestCounter.put(timeInSeconds, currentReqCount+1);
+            return true;
+       }
+        else {
+            System.out.println("count exceeded for current window "+ timeInSeconds + " count "+ currentReqCount);
+            return false;
+        }
     }
 }
 class LeakyBucket implements IRateLimiter {
 
     Queue<String> bucket;
     int capacity;
+    int leakRate;
 
-    public LeakyBucket(int capacity) {
+    public LeakyBucket(int capacity, int leakRate) {
         bucket = new ArrayDeque<>(capacity);
         this.capacity = capacity;
         new Thread(new Runnable() {
@@ -205,14 +256,22 @@ class LeakyBucket implements IRateLimiter {
             public void run() {
                 while (true) {
                     if(bucket.size() > 0) {
-                        String poll = bucket.poll();
-                        System.out.println("processing " + poll);
+                        int i = leakRate;
+                        while (i>0) {
+                            String poll = bucket.poll();
+                            if(poll == null) {
+                                System.out.println(Thread.currentThread().getName() +" nothing to process..");
+                                break;
+                            }
+                            System.out.println(Thread.currentThread().getName() +" processing " + poll);
+                            i--;
+                        }
                     }
-                    else{
-                        System.out.println("nothing to process");
+                    else {
+                        System.out.println(Thread.currentThread().getName() +" nothing to process...");
                     }
                     try {
-                        Thread.sleep(3000);
+                        Thread.sleep(500);
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
@@ -220,36 +279,49 @@ class LeakyBucket implements IRateLimiter {
             }
         }).start();
     }
-    @Override
 
+    @Override
     public boolean isAllowed(String s, long ts) {
-        if(bucket.size() < this.capacity && bucket.offer(s))
+        if(bucket.size()+1 < this.capacity && bucket.offer(s)) {
+            System.out.println(Thread.currentThread().getName() + " added bucket size "+bucket.size());
             return true;
-        else
+        }
+        else {
+            System.out.println(Thread.currentThread().getName() +" bucket size overflow " + bucket.size());
             return false;
+        }
     }
 }
 
 class TokenBucket implements IRateLimiter {
 
-    int capacity;
-    int token;
-    public TokenBucket(int c) {
+    long capacity;
+    long token;
+    long lastRefillTime;
+    long refillCountPerSecond;
+
+    public TokenBucket(int c, long windowTimeInSeconds) {
+
         this.capacity = c;
         this.token = c;
+        this.lastRefillTime = System.currentTimeMillis();
+        this.refillCountPerSecond = capacity/windowTimeInSeconds;
+
         new Thread(new Runnable() {
             @Override
             public void run() {
                 while (true) {
                     try {
-                        Thread.sleep(3000);
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-                    if (token < capacity) {
-                        System.out.println("adding token");
-                        token++;
-                    }
+                    long now = System.currentTimeMillis();
+                    long elapsedTime = now - lastRefillTime;
+                    long tokensToAdd = (elapsedTime / 1000) * refillCountPerSecond;
+                    System.out.println("token to add " + tokensToAdd +" current count " + token);
+                    token = Math.min(capacity, token + tokensToAdd);
+                    lastRefillTime = now;
                 }
             }
         }).start();

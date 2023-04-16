@@ -38,6 +38,17 @@ class Streams {
         generate.forEach(System.out::println);
     }
 
+    static void streamCreation2() {
+        Stream<String> stream = Stream.of("a", "b", "c");
+        List<Supplier<String>> collect = stream.map(x -> new Supplier<String>() {
+            @Override
+            public String get() {
+                return "hello";
+            }
+        }).collect(Collectors.toList());
+        collect.forEach(x -> System.out.println(x.get()));
+    }
+
     static void stringStream() {
         "hello".chars().forEach(System.out::println);
     }
@@ -74,7 +85,8 @@ class Streams {
         //filterStream();
         //operations();
         //reduce();
-        collect();
+        //collect();
+        streamCreation2();
     }
 
     public static void wasCalled() {

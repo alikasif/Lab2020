@@ -44,9 +44,7 @@ class DoublyLinkListQueue {
     int size=0;
 
     DLLNode add(CacheNode cacheNode) {
-
         DLLNode tmp = new DLLNode(cacheNode);
-
         if( head == null) {
             head = tmp;
             last = tmp;

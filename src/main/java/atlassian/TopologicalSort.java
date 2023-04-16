@@ -1,7 +1,5 @@
 package atlassian;
 
-import scala.Int;
-
 import java.util.*;
 
 public class TopologicalSort {
@@ -44,21 +42,19 @@ public class TopologicalSort {
         List<Integer> tpo = new ArrayList<>();
 
         while (!nodeWithZeroIndegree.isEmpty()) {
-
             Integer remove = nodeWithZeroIndegree.remove(0);
             tpo.add(remove);
-            if(map.get(remove) == null)
-                System.out.println("no neighbor for "+ remove);
+            if(map.get(remove) == null) {
+                System.out.println("no neighbor for " + remove);
+            }
             else {
                 for (int k : map.get(remove)) {
                     indegree[k]--;
-                    if (indegree[k] == 0)
+                    if (indegree[k] <= 0)
                         nodeWithZeroIndegree.add(k);
                 }
             }
         }
-
         System.out.println(tpo);
-
     }
 }

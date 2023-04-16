@@ -40,6 +40,7 @@ public class KaalHashMap {
 
     ArrayElement[] array = null;
     int capacity;
+    int totalElements;
     public KaalHashMap(int capacity) {
         this.capacity = capacity;
         this.array = new ArrayElement[capacity];
@@ -66,6 +67,7 @@ public class KaalHashMap {
             arrayElement = new ArrayElement();
             arrayElement.add(new CacheNode(key, value));
             array[index] = arrayElement;
+            totalElements++;
         }
         else {
             for(CacheNode c : arrayElement.getList()) {
