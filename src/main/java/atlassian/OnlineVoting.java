@@ -1,9 +1,13 @@
 package atlassian;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class OnlineVoting {
 
@@ -15,11 +19,10 @@ public class OnlineVoting {
         int i = 0;
         while (i < time.length) {
             Integer votec = voteCountMap.get(votes[i]);
-            if(votec == null) {
+            if (votec == null) {
                 voteCountMap.put(votes[i], 1);
-            }
-            else {
-                votec +=1;
+            } else {
+                votec += 1;
                 voteCountMap.put(votes[i], votec);
             }
             Integer idOfMaxVote = getIdOfMaxVote(voteCountMap, votes, i);
@@ -36,9 +39,9 @@ public class OnlineVoting {
         int id = -1;
         int mc = -1;
 
-        for(int j=0; j<=i; j++) {
+        for (int j = 0; j <= i; j++) {
             int c = voteCountMap.get(votes[j]);
-            if(c >= mc) {
+            if (c >= mc) {
                 mc = c;
                 id = votes[j];
             }
@@ -48,15 +51,18 @@ public class OnlineVoting {
 
     public static void main(String[] args) {
 
-        int[] votes = {0, 1, 1, 2, 0, 1, 0, 2, 2};
-        int[] time =  {0, 0, 5, 10, 15, 20, 25, 30, 35};
+        /*int[] votes = {0, 1, 1, 2, 0, 1, 0, 2, 2};
+        int[] time = {0, 0, 5, 10, 15, 20, 25, 30, 35};
         int[] queryTime = {3, 12, 25, 15, 24, 8, 45};
 
         Map<Integer, Integer> winnerATT = process(votes, time);
-        for(int t : queryTime) {
+        for (int t : queryTime) {
             int i = closestBinarySearch(t, time);
-            System.out.println(i + " :: winner at "+ t + " " + winnerATT.get(i));
-        }
+            System.out.println(i + " :: winner at " + t + " " + winnerATT.get(i));
+        }*/
+
+        //onlineVoting2();
+        onlineVoting3();
     }
 
     static void process2(int[] votes, int[] time) {
@@ -86,17 +92,15 @@ public class OnlineVoting {
                 c2++;
             }
             Integer winner = winnerAtT.get(time[i]);
-            if(winner == null) {
+            if (winner == null) {
 
-                if(c1 == c2) {
+                if (c1 == c2) {
                     winnerAtT.put(time[i], votes[i]);
                     winnerAtTMap.put(time[i], votes[i]);
-                }
-                else if (c1 > c2) {
+                } else if (c1 > c2) {
                     winnerAtT.put(time[i], 0);
                     winnerAtTMap.put(time[i], 0);
-                }
-                else {
+                } else {
                     winnerAtT.put(time[i], 1);
                     winnerAtTMap.put(time[i], 1);
                 }
@@ -113,31 +117,140 @@ public class OnlineVoting {
         System.out.println(winnerAtT.get(time[closestBinarySearch(11, time)]));
         System.out.println(winnerAtT.get(time[closestBinarySearch(33, time)]));
     }
+
     static int closestBinarySearch(int q, int[] times) {
         System.out.println("searching for " + q);
         if (q < times[0])
             return times[0];
-        if(q > times[times.length-1])
-            return times[times.length-1];
+        if (q > times[times.length - 1])
+            return times[times.length - 1];
 
-        int low =0;
-        int high = times.length-1;
-        int mid = low + (high-low)/2;
+        int low = 0;
+        int high = times.length - 1;
+        int mid = low + (high - low) / 2;
 
         while (low <= high) {
             // System.out.println(mid);
             if (times[mid] == q) {
                 return times[mid];
+            } else {
+                if (times[mid] > q)
+                    high = mid - 1;
+                else
+                    low = mid + 1;
             }
-            else {
-                    if (times[mid] > q)
-                        high = mid-1;
-                    else
-                        low = mid+1;
-            }
-            mid = low + (high-low)/2;
+            mid = low + (high - low) / 2;
         }
         //return times[high];
-        return Math.abs(q-times[low] ) < Math.abs(q - times[high]) ? times[low] : times[high];
+        return Math.abs(q - times[low]) < Math.abs(q - times[high]) ? times[low] : times[high];
+    }
+
+    static void onlineVoting3() {
+
+        List<String> vote1 = Arrays.asList("A","B","C");
+        List<String> vote2 = Arrays.asList("A","B","D");
+        List<String> vote3 = Arrays.asList("B","C","A");
+
+        List<List<String>> votesList = new ArrayList<>();
+        votesList.add(vote1);
+        votesList.add(vote2);
+        votesList.add(vote3);
+
+        Map<String, Integer> voteCount = new HashMap<>();
+        Map<Integer, List<String>> indexMap = new HashMap<>();
+
+        for(int i=0; i<votesList.size(); i++) {
+            List<String> votes = votesList.get(i);
+            int w = votes.size();
+            int j = 0;
+            for(String vote : votes) {
+                voteCount.put(vote, voteCount.getOrDefault(vote,0) + (w) );
+                w--;
+                List<String> list = indexMap.getOrDefault(j, new ArrayList<>());
+                list.add(vote);
+                indexMap.put(j++, list);
+            }
+        }
+
+        System.out.println(indexMap);
+
+        List<Map.Entry<String, Integer>> sortedVotes = voteCount.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).collect(Collectors.toList());
+
+        List<String> winners = new ArrayList<>();
+        int count =  sortedVotes.get(0).getValue(); //max vote count
+
+        for(Map.Entry<String, Integer> entry : sortedVotes) {
+            if(entry.getValue() == count){
+                winners.add(entry.getKey());
+            }
+        }
+
+        System.out.println(winners);
+        System.out.println(voteCount);
+        System.out.println(sortedVotes);
+
+        if(winners.size()>1) { // tie breaker based on index
+            for (Map.Entry<Integer, List<String>> entry : indexMap.entrySet()) {
+                List<String> indexWinner = new ArrayList<>();
+                for (String s : winners) {
+                    if (entry.getValue().contains(s)) {
+                        indexWinner.add(s);
+                    }
+                }
+                if (indexWinner.size() == 1) {
+                    System.out.println(indexWinner + " is the winner !!!");
+                    return;
+                }
+            }
+        }
+        else {
+            System.out.println(winners + " is the winner !!!");
+        }
+    }
+
+    static void onlineVoting2() {
+        String[] votes = {"john", "johnny", "jackie",
+                "johnny", "john", "jackie",
+                "jamie", "jamie", "john",
+                "johnny", "jamie", "johnny",
+                "john"};
+
+        Map<String, Integer> voteCountMap = new HashMap<>();
+
+        class Winner implements Comparable<Winner>{
+            int c;
+            String id;
+
+            @Override
+            public String toString() {
+                return id+" "+c;
+            }
+
+            @Override
+            public int compareTo(Winner o) {
+                return o.c - this.c;
+            }
+        }
+
+        Winner winner = new Winner();
+
+        for (String vote : votes) {
+            voteCountMap.compute(vote, new BiFunction<String, Integer, Integer>() {
+                @Override
+                public Integer apply(String s, Integer integer) {
+                    if(integer == null)
+                        integer=0;
+                    if(integer+1 > winner.c) {
+                        winner.c = integer+1;
+                        winner.id = s;
+                    }
+                    return integer+1;
+                }
+            });
+        }
+        System.out.println(voteCountMap);
+        System.out.println(winner);
+        List<Map.Entry<String, Integer>> list = voteCountMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).collect(Collectors.toList());
+        System.out.println(list);
     }
 }

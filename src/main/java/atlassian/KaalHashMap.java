@@ -1,12 +1,15 @@
 package atlassian;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 class ArrayElement {
-    List<CacheNode> list = new ArrayList<>();
+    private List<CacheNode> list;
+    public ArrayElement(){
+       list = new LinkedList<>();
+    }
 
-    void add(CacheNode node) {
+    public void add(CacheNode node) {
         list.add(node);
     }
 
@@ -36,6 +39,7 @@ public class KaalHashMap {
         khm.put(1, "fozia");
         khm.put(6, "six");
         khm.display();
+        System.out.println("get "+ khm.get(9));
     }
 
     ArrayElement[] array = null;
@@ -47,15 +51,16 @@ public class KaalHashMap {
     }
 
     void display() {
-
-        for(ArrayElement e : array) {
+        System.out.println("Hashmap content: ");
+        for(int i=0; i<array.length;i++) {
+            ArrayElement e = array[i];
             if(e != null) {
 /*
                 for (CacheNode c : e.getList()) {
                     System.out.println(c);
                 }
 */
-                System.out.println(e);
+                System.out.println(i +" => " +e);
             }
         }
     }
@@ -77,6 +82,22 @@ public class KaalHashMap {
                 }
             }
             arrayElement.add(new CacheNode(key, value));
+        }
+    }
+
+    String get(Integer key) {
+        int index = key.hashCode() % capacity;
+        ArrayElement arrayElement = array[index];
+        if(arrayElement == null) {
+            return null;
+        }
+        else {
+            for(CacheNode c : arrayElement.getList()) {
+                if (c.key == key) {
+                    return c.value;
+                }
+            }
+            return null;
         }
     }
 }
