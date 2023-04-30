@@ -11,9 +11,9 @@ import java.util.stream.Stream;
 public class LambdaPractise {
     public static void main(String[] args) {
         // testFunction();
-        // testConsumer();
+         testConsumer();
         // testSupplier();
-        testPredicate();
+        // testPredicate();
     }
 
     static void testPredicate() {

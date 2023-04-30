@@ -151,6 +151,8 @@ public class OnlineVoting {
         List<String> vote2 = Arrays.asList("A","B","D");
         List<String> vote3 = Arrays.asList("B","C","A");
 
+        List<Integer> vote4 = List.of(1, 2, 3);
+
         List<List<String>> votesList = new ArrayList<>();
         votesList.add(vote1);
         votesList.add(vote2);
@@ -209,7 +211,8 @@ public class OnlineVoting {
     }
 
     static void onlineVoting2() {
-        String[] votes = {"john", "johnny", "jackie",
+        String[] votes = {
+                "john", "johnny", "jackie",
                 "johnny", "john", "jackie",
                 "jamie", "jamie", "john",
                 "johnny", "jamie", "johnny",
@@ -232,22 +235,19 @@ public class OnlineVoting {
             }
         }
 
-        Winner winner = new Winner();
+        Winner winner = null;
 
         for (String vote : votes) {
-            voteCountMap.compute(vote, new BiFunction<String, Integer, Integer>() {
-                @Override
-                public Integer apply(String s, Integer integer) {
-                    if(integer == null)
-                        integer=0;
-                    if(integer+1 > winner.c) {
-                        winner.c = integer+1;
-                        winner.id = s;
-                    }
-                    return integer+1;
-                }
-            });
-        }
+            voteCountMap.put(vote, voteCountMap.getOrDefault(vote, 0)+1);
+            if(winner == null) {
+                winner = new Winner();
+            }
+            if(voteCountMap.get(vote) > winner.c) {
+                winner.id = vote;
+                winner.c = voteCountMap.get(vote);
+            }
+       }
+
         System.out.println(voteCountMap);
         System.out.println(winner);
         List<Map.Entry<String, Integer>> list = voteCountMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).collect(Collectors.toList());

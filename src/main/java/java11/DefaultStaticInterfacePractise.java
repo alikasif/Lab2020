@@ -11,11 +11,17 @@ interface one {
 
 class class1 implements one {
 
+    @Override
+    public void log(String s) {
+        System.out.println("overridden log from class1");
+    }
 }
 
 public class DefaultStaticInterfacePractise {
     public static void main(String[] args) {
-        new class1().log("hello");
+        class1 c1 = new class1();
+
+        c1.log("hello");
 
         one.log2("hello");
     }
