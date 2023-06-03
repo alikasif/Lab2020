@@ -20,8 +20,9 @@ public class LongestSubStringWORepeatChars {
             }
             else {
                 System.out.println(str.substring(k, i));
-                k = map.get(str.charAt(i))+1;
-                for(int j = 0; j<k; j++) {
+                k = map.get(str.charAt(i));
+                for(int j = 0; j<k+1; j++) {
+                    System.out.println("removing "+ str.charAt(j));
                     map.remove(str.charAt(j));
                 }
                 map.put(str.charAt(i), i);
