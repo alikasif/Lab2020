@@ -1,7 +1,5 @@
 package salesforce;
 
-import scala.Char;
-
 import java.util.*;
 
 public class TaskScheduler {
@@ -45,7 +43,7 @@ public class TaskScheduler {
                 pq.addAll(remaining);
             }
             if(pq.isEmpty()) break;
-            time = time+cycles; // cycles will remain if pq has only 1 char. so we take break. these are idel cycles.
+            time = time+cycles; // cycles will remain if pq has only 1 char. so we take break. these are ideal cycles.
         }
         System.out.println(time);
     }

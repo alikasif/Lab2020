@@ -129,6 +129,7 @@ public class LRUCache {
         lruCache.display();
         lruCache.get(1);
         lruCache.display();
+
     }
 
     void display() {

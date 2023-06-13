@@ -43,7 +43,7 @@ public class LambdaPractise {
     }
 
     static void testFunction(){
-        var integers = List.of(1, 2, 3, 4, 5);
+        List<Integer> integers = List.of(1, 2, 3, 4, 5);
         System.out.println(integers);
 
         Function<Integer, Integer> integerIntFunction = (Integer x) -> {

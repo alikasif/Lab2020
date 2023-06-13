@@ -1,4 +1,4 @@
-package atlassian;
+package lld;
 
 import java.util.*;
 
@@ -149,13 +149,13 @@ class SnakeAndLadderService {
      * ==================Initialize board==================
      */
 
-    public void setPlayers(List<Player> players) {
+    public void setPlayers(List<Player> Players) {
         this.players = new LinkedList<Player>();
-        this.initialNumberOfPlayers = players.size();
+        this.initialNumberOfPlayers = Players.size();
         Map<String, Integer> playerPieces = new HashMap<String, Integer>();
-        for (Player player : players) {
-            this.players.add(player);
-            playerPieces.put(player.getId(), 0); //Each player has a piece which is initially kept outside the board (i.e., at position 0).
+        for (Player Player : Players) {
+            this.players.add(Player);
+            playerPieces.put(Player.getId(), 0); //Each player has a piece which is initially kept outside the board (i.e., at position 0).
         }
         snakeAndLadderBoard.setPlayerPieces(playerPieces); //  Add pieces to board
     }
@@ -192,8 +192,8 @@ class SnakeAndLadderService {
         return newPosition;
     }
 
-    private void movePlayer(Player player, int positions) {
-        int oldPosition = snakeAndLadderBoard.getPlayerPieces().get(player.getId());
+    private void movePlayer(Player Player, int positions) {
+        int oldPosition = snakeAndLadderBoard.getPlayerPieces().get(Player.getId());
         int newPosition = oldPosition + positions; // Based on the dice value, the player moves their piece forward that number of cells.
 
         int boardSize = snakeAndLadderBoard.getSize();
@@ -205,9 +205,9 @@ class SnakeAndLadderService {
             newPosition = getNewPositionAfterGoingThroughSnakesAndLadders(newPosition);
         }
 
-        snakeAndLadderBoard.getPlayerPieces().put(player.getId(), newPosition);
+        snakeAndLadderBoard.getPlayerPieces().put(Player.getId(), newPosition);
 
-        System.out.println(player.getName() + " rolled a " + positions + " and moved from " + oldPosition +" to " + newPosition);
+        System.out.println(Player.getName() + " rolled a " + positions + " and moved from " + oldPosition +" to " + newPosition);
     }
 
     private int getTotalValueAfterDiceRolls() {
@@ -215,9 +215,9 @@ class SnakeAndLadderService {
         return DiceService.roll();
     }
 
-    private boolean hasPlayerWon(Player player) {
+    private boolean hasPlayerWon(Player Player) {
         // Can change the logic a bit to handle special cases when there are more than one dice (Optional requirements)
-        int playerPosition = snakeAndLadderBoard.getPlayerPieces().get(player.getId());
+        int playerPosition = snakeAndLadderBoard.getPlayerPieces().get(Player.getId());
         int winningPosition = snakeAndLadderBoard.getSize();
         return playerPosition == winningPosition; // A player wins if it exactly reaches the position 100 and the game ends there.
     }
@@ -247,26 +247,29 @@ class SnakeAndLadder {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
+        System.out.println("input number of snakes: ");
         int noOfSnakes = scanner.nextInt();
         List<Snake> snakes = new ArrayList<Snake>();
         for (int i = 0; i < noOfSnakes; i++) {
             snakes.add(new Snake(scanner.nextInt(), scanner.nextInt()));
         }
 
+        System.out.println("input number of Ladders: ");
         int noOfLadders = scanner.nextInt();
         List<Ladder> ladders = new ArrayList<Ladder>();
         for (int i = 0; i < noOfLadders; i++) {
             ladders.add(new Ladder(scanner.nextInt(), scanner.nextInt()));
         }
 
+        System.out.println("input number of players: ");
         int noOfPlayers = scanner.nextInt();
-        List<Player> players = new ArrayList<Player>();
+        List<Player> Players = new ArrayList<Player>();
         for (int i = 0; i < noOfPlayers; i++) {
-            players.add(new Player(scanner.next()));
+            Players.add(new Player(scanner.next()));
         }
 
         SnakeAndLadderService snakeAndLadderService = new SnakeAndLadderService();
-        snakeAndLadderService.setPlayers(players);
+        snakeAndLadderService.setPlayers(Players);
         snakeAndLadderService.setSnakes(snakes);
         snakeAndLadderService.setLadders(ladders);
 
