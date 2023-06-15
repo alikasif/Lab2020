@@ -69,7 +69,6 @@ class DispenseItem implements State {
     }
 }
 
-
 class ReadyState implements State {
     private VendingMachine vendingMachine;
 

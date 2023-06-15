@@ -72,6 +72,7 @@ class Bank {
     private String bankCode;
 
     List<ATM> atms = new ArrayList<>();
+    List<Customer> customers = new ArrayList<>();
 
     public String getBankCode() {return "hello"; }
     public boolean addATM(ATM atm) {

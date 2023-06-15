@@ -8,6 +8,7 @@ interface CartItem  {
     public double getPrice();
     public void setPrice(double price);
 }
+
 abstract class Product implements CartItem {
     String name;
     double price;
@@ -24,28 +25,33 @@ abstract class Product implements CartItem {
         this.price = price;
     }
 }
+
 class Card extends Product {
     public Card(String name, double price) {
         this.name = name;
         this.price = price;
     }
 }
+
 class TShirt extends Product {
     public TShirt(String name, double price) {
         this.name = name;
         this.price = price;
     }
 }
+
 class BackPack extends Product {
     public BackPack(String name, double price) {
         this.name = name;
         this.price = price;
     }
 }
+
 interface Coupon {
     void apply(Cart cart);
     void setSuccessor(Coupon successor);
 }
+
 class CouponAll implements Coupon {
     private static final float DISCOUNT = 0.25f;
     Coupon successor;
@@ -61,6 +67,7 @@ class CouponAll implements Coupon {
         }
     }
 }
+
 class CouponNext implements Coupon {
     private static final float DISCOUNT = 0.10f;
     private int discountItemIndex;
@@ -81,6 +88,7 @@ class CouponNext implements Coupon {
         }
     }
 }
+
 class CouponNextBackPack implements Coupon {
     private static final float DISCOUNT = 0.15f;
     private int discountItemStartIndex;
@@ -113,6 +121,7 @@ interface Cart {
     List<CartItem> getItems();
     // void setItems(Set<CartItem> cartItems);
 }
+
 public class ShoppingCart implements Cart {
     private List<CartItem> items = new ArrayList<>();
     boolean addItem(CartItem item) {

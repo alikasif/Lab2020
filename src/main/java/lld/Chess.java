@@ -307,6 +307,10 @@ class Move {
         return end;
     }
 
+    public ChessPlayer getChessPlayer(){
+        return chessPlayer;
+    }
+
     public void setPieceKilled(Piece destPiece) {
             pieceKilled = destPiece;
     }
@@ -352,12 +356,13 @@ public class Chess {
         Box startBox = board.getBox(startX, startY);
         Box endBox = board.getBox(startY, endY);
         Move move = new Move(chessPlayer, startBox, endBox);
-        return this.makeMove(move, chessPlayer);
+        return this.makeMove(move);
     }
 
-    private boolean makeMove(Move move, ChessPlayer chessPlayer) {
+    private boolean makeMove(Move move) {
 
         Piece sourcePiece = move.getStart().getPiece();
+        ChessPlayer chessPlayer = move.getChessPlayer();
 
         if (sourcePiece == null) {
             return false;
