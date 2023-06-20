@@ -91,7 +91,6 @@ class TransactionalKVStore implements ITransactionalKVStore {
             return;
         }
 
-
         MyKVSTore currentTxn = stack.pop();
         MyKVSTore nextActiveTxn = stack.isEmpty() ? null : stack.peek();
         for(Map.Entry<String, String> entry : currentTxn.getAllKVEntries()) {
@@ -128,7 +127,8 @@ class ConcurrentTxnKVStore extends TransactionalKVStore {
         writeLock.lock();
         try {
             super.commit();
-        }finally {
+        }
+        finally {
             writeLock.unlock();
         }
     }
