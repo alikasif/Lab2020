@@ -47,6 +47,8 @@ class ElevatorHandler {
 class AutomatedElevator {
 
     private static AutomatedElevator _elevator;
+
+    int elevatorId;
     int startFloor;
     int endFloor;
     int currentfloor;
@@ -55,7 +57,8 @@ class AutomatedElevator {
     PriorityQueue<Integer> queueUp;
     PriorityQueue<Integer> queueDown;
 
-    private AutomatedElevator(){
+    private AutomatedElevator(int id){
+        this.elevatorId = id;
         this.currentfloor = 0;
         this.startFloor = 0;
         this.endFloor = 10;
@@ -66,17 +69,17 @@ class AutomatedElevator {
 
     }
 
-    public synchronized static AutomatedElevator getElevator()
+    public synchronized static AutomatedElevator getElevator(int id)
     {
         if ( _elevator == null ) {
-            _elevator = new AutomatedElevator();
+            _elevator = new AutomatedElevator(id);
         }
         return _elevator;
     }
 
 }
 
-interface IElevator {
+interface IElevatorServer {
 
     public void startMovingUp(AutomatedElevator e);
 
@@ -85,9 +88,9 @@ interface IElevator {
     public boolean isApproachingFloor(AutomatedElevator e, int floor);
 }
 
-class ElevatorServer implements Runnable, IElevator {
+class ElevatorServer implements Runnable, IElevatorServer {
 
-    final static AutomatedElevator elevator = AutomatedElevator.getElevator();
+    final static AutomatedElevator elevator = AutomatedElevator.getElevator(1);
 
     /**
      * Method is continuously serving the lift request
@@ -176,7 +179,6 @@ class ElevatorServer implements Runnable, IElevator {
         }
     }
 
-
     @Override
     public void startMovingUp(AutomatedElevator e) {
 
@@ -189,8 +191,9 @@ class ElevatorServer implements Runnable, IElevator {
 
     @Override
     public boolean isApproachingFloor(AutomatedElevator e, int floor) {
+
         if((e.currentfloor < floor && e.direction == Direction.UP) ||
-                (e.currentfloor > floor && e.direction == Direction.DOWN)){
+                (e.currentfloor > floor && e.direction == Direction.DOWN)) {
             return true;
         }
         return false;
@@ -205,7 +208,7 @@ class Elevator {
         new Thread(server).start() ;
 
         // Get the instance of Elevator
-        AutomatedElevator elevator = AutomatedElevator.getElevator();
+        AutomatedElevator elevator = AutomatedElevator.getElevator(1);
 
         // Move Elevator
         ElevatorHandler.goToFloor(elevator, 2);
@@ -221,7 +224,6 @@ class Elevator {
         ElevatorHandler.goToFloor(elevator, 3);
     }
 }
-
 
 
 

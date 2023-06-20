@@ -78,9 +78,6 @@ class AdditionalDriver {
 class CarRentalLocation {
     private String name;
     private CarRentalAddress location;
-
-    private List<CarRentalLocation> locations;
-
     public CarRentalAddress getLocation() { return location; }
 }
 
@@ -124,10 +121,6 @@ class RentalVan extends RentalVehicle {
 class RentalTruck extends RentalVehicle {
     private String type;
 }
-
-// We can have similar definition for other vehicle types
-
-//...
 
 class VehicleLog {
     private String id;

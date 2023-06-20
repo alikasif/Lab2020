@@ -83,7 +83,6 @@ class Bank {
 public class ATM {
     private int atmID;
     private Address location;
-
     private CashDispenser cashDispenser;
     private Keypad keypad;
     private Screen screen;

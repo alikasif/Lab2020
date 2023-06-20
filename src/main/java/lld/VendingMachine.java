@@ -26,7 +26,6 @@ class DispenseChange implements State {
     public void dispenseChange(String productCode) {
         this.vendingMachine.calculateChange(productCode);
         this.vendingMachine.setState(new DispenseItem(vendingMachine));
-        this.vendingMachine.dispenseItem(productCode);
     }
 
     @Override
@@ -59,6 +58,7 @@ class DispenseItem implements State {
 
     @Override
     public void dispenseItem(String productCode) {
+        vendingMachine.dispenseItem(productCode);
         vendingMachine.removeProduct(productCode);
         vendingMachine.setState(new ReadyState(vendingMachine));
     }
@@ -78,7 +78,8 @@ class ReadyState implements State {
 
     @Override
     public void collectCash(int cash) {
-        this.vendingMachine.addCollectedCash(cash);
+        vendingMachine.addCollectedCash(cash);
+        vendingMachine.setState(new DispenseChange(vendingMachine));
     }
 
     @Override
@@ -97,7 +98,38 @@ class ReadyState implements State {
     }
 }
 
+class TransactionCancelledState implements State {
+
+    VendingMachine vmch;
+
+    public TransactionCancelledState(VendingMachine vmch) {
+        this.vmch = vmch;
+    }
+
+    @Override
+    public void collectCash(int cash) {
+        throw new IllegalStateException("wrong action");
+    }
+
+    @Override
+    public void dispenseChange(String productCode) {
+        throw new IllegalStateException("wrong action");
+    }
+
+    @Override
+    public void dispenseItem(String productCode) {
+        throw new IllegalStateException("wrong action");
+    }
+
+    @Override
+    public void cancelTransaction() {
+        vmch.setCollectedCash(0);
+        vmch.setState(new ReadyState(vmch));
+    }
+}
+
 public class VendingMachine {
+
     private int collectedCash;
     private State state;
     private Map<String, Set<String>> productCodeItemMap;
@@ -122,7 +154,6 @@ public class VendingMachine {
     }
 
     public void removeProduct(String productCode) {
-
     }
 
     public void dispenseChange(String productCode) {
@@ -143,5 +174,10 @@ public class VendingMachine {
 
     public int getCollectedCash() {
         return collectedCash;
+    }
+
+    public static void main(String[] args) {
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.setState(new ReadyState(vendingMachine));
     }
 }
