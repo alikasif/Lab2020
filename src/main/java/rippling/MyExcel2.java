@@ -34,6 +34,14 @@ class Sheet {
         }
     }
 
+    @Override
+    public String toString() {
+        for(Map.Entry<String, Cell> entry : cellMap.entrySet()) {
+            System.out.println(entry.getValue());
+        }
+        return "";
+    }
+
     class Cell {
         String colName;
         String value;
@@ -49,8 +57,10 @@ class Sheet {
         @Override
         public String toString() {
             return "Cell{" +
-                    "index='" + colName + '\'' +
-                    ", value='" + value + '\'' +
+                    " Name='" + colName + '\'' +
+                    ", Value='" + value + '\'' +
+                    ", rawValue='" + rawValue + '\'' +
+                    //", Observers='" + observers + '\'' +
                     '}';
         }
 
@@ -86,7 +96,7 @@ class Sheet {
                 for(String sv : split) {
                     if(sv.matches("[A-Z]+")) {
                         Cell cell = cellMap.get(sv);
-                        value = value + Integer.parseInt(cell.evaluateValue());
+                        value = value + Integer.parseInt(cell.evaluateValue()); // DFS
                     }
                     else {
                         value = value + Integer.parseInt(sv);
@@ -127,5 +137,7 @@ public class MyExcel2 {
         System.out.println("C => " +sheet.get("C"));
         System.out.println("E => " +sheet.get("E"));
         System.out.println("D => " +sheet.get("D"));
+
+        sheet.toString();
     }
 }
