@@ -2,14 +2,22 @@ package rippling;
 
 import java.util.*;
 
+class Row {
+    int rowId;
+    Cell[] cells = new Cell[26];
+}
+
 class Cell {
-    String index;
+
+    String colIndex;
     String value;
-    List<Cell> observers;
+    String rawValue;
+    List<String> observers;
 
     public Cell(String index, String value) {
-        this.index = index;
+        this.colIndex = index;
         this.value = value;
+        observers = new ArrayList<>();
     }
 
     public void setValue(String value) {
@@ -19,9 +27,28 @@ class Cell {
     @Override
     public String toString() {
         return "Cell{" +
-                "index='" + index + '\'' +
+                "index='" + colIndex + '\'' +
                 ", value='" + value + '\'' +
                 '}';
+    }
+
+    public void setObserver(String index) {
+        observers.add(index);
+    }
+
+    public void setRawValue(String rawValue) {
+        this.rawValue = rawValue;
+
+        // it is referring to some other cell. set this cell as observer in referred cell observer list
+        if(rawValue.startsWith("=")) {
+            String tmp = rawValue.substring(1);
+            String[] split = tmp.split("\\+");
+            for(String s : split) {
+                if(s.matches("[A-Z]+")) {
+                    ;
+                }
+            }
+        }
     }
 }
 
@@ -30,6 +57,7 @@ class SpreadSheet {
     Map<String, Cell> sheet;
     int value;
     boolean isRecursive = false;
+
     public SpreadSheet() {
         sheet = new HashMap<>();
     }
@@ -55,9 +83,13 @@ class SpreadSheet {
     }
 
     private void getRecursively(String index, Set<String> visited) {
+
         Cell cell = null;
+
         if(sheet.containsKey(index)) {
+
             cell = sheet.get(index);
+
             if(cell.value.startsWith("=")) {
                 String subString = cell.value.substring(1);
                 String [] split = subString.split("\\+");
@@ -81,6 +113,9 @@ class SpreadSheet {
             else {
                 value = value + Integer.valueOf(cell.value);
             }
+        }
+        else {
+            throw new RuntimeException("column not found : " + index);
         }
 
         if(isRecursive) {
@@ -110,5 +145,8 @@ public class MyExcel {
 
         spreadSheet.set("A6", "=A3+A4");
         System.out.println(spreadSheet.get("A5"));
+
+        spreadSheet.set("A7", "=A11+A12");
+        System.out.println(spreadSheet.get("A7"));
     }
 }
