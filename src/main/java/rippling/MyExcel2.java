@@ -70,7 +70,7 @@ class Sheet {
                     }
                 }
             }
-            System.out.println(this .colName + " observer: "+ observers);
+            // System.out.println(this .colName + " observer: "+ observers);
         }
 
         public String evaluateValue() {
@@ -112,14 +112,20 @@ public class MyExcel2 {
         Sheet sheet = new Sheet();
         sheet.set("A", "1");
         sheet.set("B", "2");
-        System.out.println(sheet.get("A"));
+        System.out.println("A => " +sheet.get("A"));
         sheet.set("C", "=1+A");
-        System.out.println(sheet.get("C"));
+        System.out.println("C => " +sheet.get("C"));
         sheet.set("D", "=C+B");
-        System.out.println(sheet.get("D"));
+        System.out.println("D => " +sheet.get("D"));
         sheet.set("C", "=5+A");
-        System.out.println(sheet.get("C"));
-        System.out.println(sheet.get("D"));
+        System.out.println("C => " +sheet.get("C"));
+        System.out.println("D => " +sheet.get("D"));
 
+        sheet.set("E", "=D+C");
+        System.out.println("E => " +sheet.get("E"));
+        sheet.set("C", "=10+B");
+        System.out.println("C => " +sheet.get("C"));
+        System.out.println("E => " +sheet.get("E"));
+        System.out.println("D => " +sheet.get("D"));
     }
 }
