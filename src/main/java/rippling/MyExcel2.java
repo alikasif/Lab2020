@@ -109,7 +109,7 @@ class Sheet {
             return String.valueOf(value);
         }
 
-        public void notifyObservers() {
+        private void notifyObservers() {
             for(Cell c : observers) {
                 c.evaluateValue();
             }
@@ -137,7 +137,8 @@ public class MyExcel2 {
         System.out.println("C => " +sheet.get("C"));
         System.out.println("E => " +sheet.get("E"));
         System.out.println("D => " +sheet.get("D"));
-
+        sheet.set("F", "=10+1");
+        System.out.println("F => " +sheet.get("F"));
         sheet.toString();
     }
 }
