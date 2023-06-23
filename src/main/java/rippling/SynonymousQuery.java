@@ -38,165 +38,130 @@ public class SynonymousQuery {
         synonymList.add(new String[]{"b", "g"});
         synonymList.add(new String[]{"b", "d"});
         synonymList.add(new String[]{"a", "x"});
+        synonymList.add(new String[]{"i", "j"});
+        synonymList.add(new String[]{"p", "q"});
+        synonymList.add(new String[]{"m", "n"});
+        synonymList.add(new String[]{"j", "z"});
 
-        Map<String, String> stringStringMap = prepareSynonymMap(synonymList);
-        System.out.println(stringStringMap);
+        Map<String, String> synonymMap = prepareSynonymMap2(synonymList);
+        System.out.println(synonymMap);
 
 
-        List<List<String>> sentences = new ArrayList<>();
 
-        List<String> list = new ArrayList<>();
-        list.add("obama approval rate");
-        list.add("obama popularity ratings");
-        sentences.add(list);
+        synonymList = new ArrayList<>();
+        synonymList.add(new String[]{"ratings", "rate"});
+        synonymList.add(new String[]{"approval", "popularity"});
+        synonymList.add(new String[]{"ratings", "rates"});
+        synonymMap = prepareSynonymMap2(synonymList);
+        System.out.println(synonymMap);
 
-        List<String> list2 = new ArrayList<>();
-        list2.add("obama approval rates");
-        list2.add("obama popularity ratings");
-        sentences.add(list2);
 
-        List<String> list3 = new ArrayList<>();
-        list3.add("obama approval rate");
-        list3.add("popularity ratings obama");
-        sentences.add(list3);
+        List<String[]> sentenceList = new ArrayList<>();
+        String[] sentences1 = {"obama approval rate", "obama popularity ratings"};
+        sentenceList.add(sentences1);
 
-        System.out.println(sentences);
-        System.out.println();
+        String[] sentences2 = {"obama approval rates", "obama popularity ratings"};
+        sentenceList.add(sentences2);
+        String[] sentences3 = {"obama approval rate", "popularity ratings obama"};
+        sentenceList.add(sentences3);
 
-        /*for (List<String> lst : sentences) {
-            String[][] tmp = new String[lst.size()][];
-            int maxl = 0;
-            int k = 0;
-            for (String s : lst) {
-                String[] s1 = s.split(" ");
-                tmp[k] = s1;
-                maxl = Math.max(maxl, s1.length);
-                k++;
-            }
-            System.out.println(lst);
-            for(String x[] : tmp) {
-                System.out.println(Arrays.toString(x));
-            }
-            int r=0; int c=0; boolean found = true;
 
-            while (c < maxl) {
-                found = true;
-                Set<String> set = new HashSet<>();
-                while (r < tmp.length) {
-                    set.add(tmp[r][c]);
-                    r++;
-                }
-                System.out.println("words from set => " +set);
-                c++;
-                r=0;
-                if(set.size()>1) {
-                    Set<String> tmps = new HashSet<>();
-                    for(String rs : set) {
-                        if(map.get(rs) != null) {
-                            tmps.addAll(map.get(rs));
-                            tmps.add(rs);
-                        }
-                    }
-                    for(String rs : set) {
-                        if(!tmps.contains(rs)) {
-                            System.out.println(rs +" not found in "+ tmps);
-                            found = false;
-                            break;
-                        }
-                    }
-                }
-            }
-            if(!found) {
-                System.out.println("### Not synonymous " + lst);
-            }
-            else {
-                System.out.println("*** synonymous " + lst);
-            }
-        }*/
+        Map<String, Boolean> stringBooleanMap = checkSimilarity(synonymMap, sentenceList);
+        System.out.println(stringBooleanMap);
 
-        for (List<String> lst : sentences) {
-            String[][] strings = processSentence(lst);
-            boolean checked = checkSynonym(strings, map);
-            System.out.println(lst + " *** result " + checked);
-            System.out.println("\n");
-        }
     }
 
-    private static Map<String, String> prepareSynonymMap2(String[] words, Map<String, String> map) {
-        if (!map.containsKey(words[0])) {
-            map.put(words[0], words[0]);
-        }
-        if (!map.containsKey(words[1])) {
-            map.put(words[1], words[1]);
+    private static Map<String, String> prepareSynonymMap2(List<String[]>  synonyms) {
+
+        Map<String, String> synonymMap = new HashMap<>();
+
+        Map<String, List<String>> map = new HashMap<>();
+        Set<String> allWords = new HashSet<>();
+
+        for(String[] list : synonyms) {
+
+            String w1 = list[0];
+            String w2 = list[1];
+
+            allWords.add(w1);
+            allWords.add(w2);
+
+            List<String> w1List = map.getOrDefault(w1, new ArrayList<>());
+            w1List.add(w2);
+            map.put(w1, w1List);
+
+            List<String> w2List = map.getOrDefault(w2, new ArrayList<>());
+            w2List.add(w1);
+            map.put(w2, w2List);
         }
 
-        List<String> wordsTraversed = new ArrayList<>();
+        Set<String> visited = new HashSet<>();
+        List<String> wordList = new ArrayList<>(allWords);
 
-        return map;
+        while (!wordList.isEmpty()) {
+
+            String removedWord = wordList.remove(0);
+
+            if(visited.contains(removedWord))
+                continue;
+
+            Stack<String> stack = new Stack<>();
+            stack.add(removedWord);
+            Set<String> synonymSet = new HashSet<>();
+
+            while (!stack.isEmpty()) {
+                String pop  = stack.pop();
+                visited.add(pop);
+                synonymSet.add(pop);
+                for(String value : map.get(pop)) {
+                    if(!visited.contains(value)) {
+                        stack.add(value);
+                    }
+                }
+            }
+
+            String synWord = null;
+            for(String w : synonymSet) {
+                if(synWord == null)
+                    synWord = w;
+                synonymMap.put(w, synWord);
+            }
+        }
+        return synonymMap;
     }
 
-    private static Map<String, String> prepareSynonymMap(List<String[]> synonyms) {
+    static Map<String, Boolean> checkSimilarity(Map<String, String> synonymMap, List<String[]> sentenceList) {
 
-        // a -> b  c -> d   g -> d  b -> g  b -> d  a -> x
-        // map all keys to same value
-        //
-        // key map to anther  key
-        // key map to another value
-        // value map to another key
-        // value map to another value
+        Map<String, Boolean> resultMap = new HashMap<>();
 
-        // at a time we will deal with 2 entries only
+        for(String[] sentences : sentenceList) {
 
-        Map<String, String> map = new HashMap<>();
+            String[] sentence1 = sentences[0].split(" ");
+            String[] sentence2 = sentences[1].split(" ");
 
-        for(String[] lst : synonyms) {
-            if( map.containsKey(lst[0]) || map.containsKey(lst[1]) || map.containsValue(lst[0]) || map.containsValue(lst[1]) ) {
-
-                if(map.containsKey(lst[0])) {
-                    map.put(lst[1], map.get(lst[0]));
-                }
-
-                // x -> b =>  (a,x) => a -> b
-                else if(map.containsKey(lst[1])) {
-                    map.put(lst[0], map.get(lst[1]));
-                }
-
-                // a -> x => (x, b) => b -> x
-                else if(map.containsValue(lst[0])) {
-                    map.put(lst[1], lst[0]);
-                }
-
-                // a -> x => (b, x) => b -> x
-                else if(map.containsValue(lst[1])) {
-                    map.put(lst[0], lst[1]);
-                }
+            if(sentence1.length != sentence2.length) {
+                resultMap.put(sentences[0] + " | " + sentences[1], false);
+                continue;
             }
-            else {
-                map.put(lst[0], lst[1]);
+
+            int i = 0;
+            boolean result = true;
+            while ( result && i < sentence1.length) {
+                if(!sentence1[i].equals(sentence2[i])) {
+                    if(synonymMap.containsKey(sentence1[i]) && synonymMap.containsKey(sentence2[i]) ) {
+                        if (!(synonymMap.get(sentence1[1]).equals(synonymMap.get(sentence2[1])))) {
+                            result = false;
+                        }
+                    }
+                    else {
+                        result = false;
+                    }
+                }
+                i++;
             }
+            resultMap.put(sentences[0] +" | " + sentences[1], result);
         }
-
-        // find entries where value is key
-        boolean modified = true;
-        int c=0;
-        while (modified) {
-            modified = false;
-            Set<String> samekV = new HashSet<>();
-            for(Map.Entry<String, String> kv : map.entrySet()) {
-                if(map.containsKey(kv.getValue())) {
-                    map.put(kv.getKey(), map.get(kv.getValue()));
-                    modified = true;
-                    c++;
-                }
-                if(kv.getKey().equals(kv.getValue())) {
-                    samekV.add(kv.getKey());
-                }
-            }
-            for(String k : samekV)
-                map.remove(k);
-        }
-        System.out.println("looped "+c);
-        return map;
+        return resultMap;
     }
 
     static String[][]  processSentence(List<String> lst) {

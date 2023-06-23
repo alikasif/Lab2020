@@ -58,8 +58,8 @@ class Sheet {
         public String toString() {
             return "Cell{" +
                     " Name='" + colName + '\'' +
+                    ", RawValue='" + rawValue + '\'' +
                     ", Value='" + value + '\'' +
-                    ", rawValue='" + rawValue + '\'' +
                     //", Observers='" + observers + '\'' +
                     '}';
         }
