@@ -63,4 +63,27 @@ public class ShortestPathCurrencyExchangeTest {
         exchangeRate = currencyConverter.getExchangeRate("AUD", "MOS", exchangeRateTable);
         Assert.assertEquals((Double) 2.0, exchangeRate);
     }
+
+    @Test
+    public void testCheapestPath() {
+
+        Currency[] currencies  = {
+
+                new Currency("USD", "JPY", 110),
+                new Currency("USD", "AUD", 1),
+                new Currency("AUD", "JPY", 4),
+                new Currency("USD", "MOS", 1),
+                new Currency("MOS", "JPY", 2)
+        };
+
+        CurrencyConverter currencyConverter = new CurrencyConverter();
+        Map<String, Map<String, Double>> exchangeRateTable = currencyConverter.prepareAdjList(currencies);
+        Assert.assertNotNull(exchangeRateTable);
+
+        Double exchangeRate = currencyConverter.getCheapestExchangeRate("USD", "JPY", exchangeRateTable);
+        Assert.assertEquals((Double) 2.0, exchangeRate);
+
+        exchangeRate = currencyConverter.getCheapestExchangeRate("AUD", "MOS", exchangeRateTable);
+        Assert.assertEquals((Double) 1.0, exchangeRate);
+    }
 }

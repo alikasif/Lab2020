@@ -35,9 +35,17 @@ class Pair implements Comparable<Pair> {
 
     @Override
     public int compareTo(Pair o) {
-        if(o.rate == this.rate)
+        if(o.rate.equals(this.rate))
             return 0;
         return Double.compare(this.rate, o.rate);
+    }
+
+    @Override
+    public String toString() {
+        return "Pair{" +
+                "currency='" + currency + '\'' +
+                ", rate=" + rate +
+                '}';
     }
 }
 
@@ -101,7 +109,7 @@ class CurrencyConverter {
         return 0.0;
     }
 
-    public Double getCheapestExchangeRate(String source, String target,Map<String, Map<String, Double>> table) {
+    public Double getCheapestExchangeRate(String source, String target, Map<String, Map<String, Double>> table) {
 
         if( !table.containsKey(source) || !table.containsKey(target))
             return 0.0;
@@ -119,7 +127,7 @@ class CurrencyConverter {
 
             Pair poll = queue.poll();
 
-            if (minCostMap.containsKey(poll.currency) && minCostMap.get(poll.currency) < poll.rate) {
+            if (minCostMap.containsKey(poll.currency) && minCostMap.get(poll.currency) <= poll.rate) {
                 continue;
             }
 
@@ -133,11 +141,18 @@ class CurrencyConverter {
 
                 double newRate = poll.rate * dest.getValue(); // calculate cost of going from here to destination
 
-                if ( dest.getKey().equals(source) ||  (minCostMap.containsKey(dest.getKey()) && minCostMap.get(dest.getKey()) >= newRate) ) {
+                if ( dest.getKey().equals(source)) {
                     continue;   // take care in next iteration
                 }
 
+                if (minCostMap.containsKey(dest.getKey()) && minCostMap.get(dest.getKey()) > newRate)  {
+                    System.out.println("min cost is more:  " + dest.getKey() + " " + newRate + " "+ minCostMap);
+                    minCostMap.put(dest.getKey(), newRate);
+                    //continue;
+                }
+
                 queue.add(new Pair(dest.getKey(), newRate)); // from -> to  with this new rate
+                System.out.println(queue);
             }
         }
         if (!table.get(source).containsKey(target)) {

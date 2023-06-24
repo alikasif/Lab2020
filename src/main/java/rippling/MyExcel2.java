@@ -4,42 +4,79 @@ import java.util.*;
 
 class Sheet {
 
-    Map<String, Cell> cellMap = new HashMap<>();
+    Map<String, Cell> sheetMap = new HashMap<>();
+
+    Map<String, Row> rowMap = new HashMap<>();
 
     public Sheet() {
     }
 
     public void set(String cellName, String cellValue) {
         Cell cell = null;
-        if(cellMap.containsKey(cellName)) {
-            cell = cellMap.get(cellName);
+        if(sheetMap.containsKey(cellName)) {
+            cell = sheetMap.get(cellName);
             cell.setRawValue(cellValue);
         }
         else {
             cell = new Cell(cellName, cellValue);
-            cellMap.put(cellName, cell);
+            sheetMap.put(cellName, cell);
             cell.setRawValue(cellValue);
         }
         cell.evaluateValue();
         cell.notifyObservers();
     }
 
+    public void setValue(String cellName, String cellValue) {
+        String rowId = cellName.substring(1);
+        Row row = rowMap.getOrDefault(rowId, new Row());
+        rowMap.put(rowId, row);
+        row.setValue(cellName, cellValue);
+    }
+
+    public String getValue(String cellName) {
+        String rowId = cellName.substring(1);
+        Row row = rowMap.get(rowId);
+        if(row == null)
+            throw  new RuntimeException("cell not set");
+        return row.getValue(cellName);
+    }
+
     public String get(String cellName) {
-        if(!cellMap.containsKey(cellName)) {
+        if(!sheetMap.containsKey(cellName)) {
             throw  new RuntimeException("cell not set");
         }
         else {
-            Cell cell = cellMap.get(cellName);
+            Cell cell = sheetMap.get(cellName);
             return cell.value;
         }
     }
 
     @Override
     public String toString() {
-        for(Map.Entry<String, Cell> entry : cellMap.entrySet()) {
+        for(Map.Entry<String, Cell> entry : sheetMap.entrySet()) {
             System.out.println(entry.getValue());
         }
         return "";
+    }
+
+    class Row {
+        Map<String, Cell> cellMap = new HashMap<>();
+
+        public void setValue(String cellName, String cellValue) {
+            Cell cell = cellMap.getOrDefault(cellName, new Cell(cellName, cellValue));
+            cellMap.put(cellName, cell);
+            sheetMap.put(cellName, cell);
+            cell.setRawValue(cellValue);
+            cell.evaluateValue();
+            cell.notifyObservers();
+        }
+
+        public String getValue(String cellName) {
+            Cell cell = cellMap.get(cellName);
+            if(cell == null)
+                throw  new RuntimeException("cell not set " + cellName);
+            return cell.value;
+        }
     }
 
     class Cell {
@@ -72,9 +109,9 @@ class Sheet {
                 String tmp = rawValue.substring(1);
                 String[] split = tmp.split("\\+");
                 for(String s : split) {
-                    if(s.matches("[A-Z]+")) {
-                        if(cellMap.containsKey(s))
-                            cellMap.get(s).observers.add(this); // C = 1 + A ==> add C in observer list of A
+                    if(s.matches("[A-Z][0-9]*+")) {
+                        if(sheetMap.containsKey(s))
+                            sheetMap.get(s).observers.add(this); // C = 1 + A ==> add C in observer list of A
                         else
                             throw new RuntimeException("cell not found "+ s);
                     }
@@ -94,8 +131,8 @@ class Sheet {
             if(rawValue.startsWith("=")) {
                 String[] split = rawValue.substring(1).split("\\+");
                 for(String sv : split) {
-                    if(sv.matches("[A-Z]+")) {
-                        Cell cell = cellMap.get(sv);
+                    if(sv.matches("[A-Z][0-9]*+")) {
+                        Cell cell = sheetMap.get(sv);
                         value = value + Integer.parseInt(cell.evaluateValue()); // DFS
                     }
                     else {

@@ -23,6 +23,121 @@ interface ITransactionalKVStore extends IKVStore {
     void rollback();
 }
 
+class MyTransaction {
+    IKVStore kvStore = new MyKVSTore();
+    public MyTransaction(){
+    }
+
+    public void set(String key, String value) {
+        kvStore.set(key, value);
+    }
+
+    public String get(String key) {
+        return kvStore.get(key);
+    }
+
+    public String delete(String key) {
+        return kvStore.delete(key);
+    }
+
+    public Set<Map.Entry<String, String>> getAllKVEntries() {
+        return kvStore.getAllKVEntries();
+    }
+
+    public void clearAllKeys() {
+        kvStore.clearAllKeys();
+    }
+}
+
+class TransactionalKVStore2 implements ITransactionalKVStore {
+
+    private Stack<MyTransaction> stack = null;
+
+    private MyKVSTore kvStore = null;
+
+    public TransactionalKVStore2() {
+        stack = new Stack<>();
+        kvStore = new MyKVSTore();
+    }
+
+    @Override
+    public void set(String key, String value) {
+        if(stack.isEmpty()) {
+            kvStore.set(key, value);
+            return;
+        }
+        MyTransaction currentTxn = stack.peek();
+        currentTxn.set(key, value);
+    }
+
+    @Override
+    public String get(String key) {
+        if(stack.isEmpty()) {
+            return kvStore.get(key);
+        }
+        MyTransaction currentTxn = stack.peek();
+        return currentTxn.get(key);
+    }
+
+    @Override
+    public String delete(String key) {
+        if(stack.isEmpty()) {
+            return kvStore.delete(key);
+        }
+        MyTransaction currentTxn = stack.peek();
+        return currentTxn.delete(key);
+    }
+
+    @Override
+    public Set<Map.Entry<String, String>> getAllKVEntries() {
+        throw new RuntimeException("not implemented getAllKVEntries()");
+    }
+
+    @Override
+    public void clearAllKeys() {
+        throw new RuntimeException("not implemented clearAllKeys()" );
+    }
+
+    @Override
+    public void begin() {
+        MyTransaction newTxn = new MyTransaction();
+        stack.push(newTxn);
+    }
+
+    @Override
+    public void end() {
+        stack.pop();
+    }
+
+    @Override
+    public void commit() {
+
+        if(stack.isEmpty()){
+            System.out.println("No active Txn");
+            return;
+        }
+
+        MyTransaction currentTxn = stack.pop();
+        MyTransaction nextActiveTxn = stack.isEmpty() ? null : stack.peek();
+        for(Map.Entry<String, String> entry : currentTxn.getAllKVEntries()) {
+            kvStore.set(entry.getKey(), entry.getValue());
+            if(nextActiveTxn != null) {
+                nextActiveTxn.set(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    @Override
+    public void rollback() {
+        if(stack.isEmpty()){
+            System.out.println("No active Txn");
+            return;
+        }
+        MyTransaction currentTxn = stack.peek();
+        currentTxn.clearAllKeys();
+    }
+}
+
 class TransactionalKVStore implements ITransactionalKVStore {
 
     private Stack<MyKVSTore> stack = null;

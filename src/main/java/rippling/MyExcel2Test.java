@@ -109,4 +109,27 @@ public class MyExcel2Test {
         Assert.assertEquals("3", sheet.get("C"));
         Assert.assertEquals("7", sheet.get("D"));
     }
+
+    @Test(expected = RuntimeException.class)
+    public void testCyclicReference() {
+        Sheet sheet = new Sheet();
+        sheet.set("A", "=1+C");
+        sheet.set("B", "=A+1");
+        sheet.set("C", "=1+B");
+        Assert.assertEquals("1", sheet.get("A"));
+        Assert.assertEquals("2", sheet.get("B"));
+        Assert.assertEquals("3", sheet.get("C"));
+    }
+
+    @Test
+    public void testRow() {
+        Sheet sheet = new Sheet();
+        sheet.setValue("A1", "1");
+        sheet.setValue("B1", "=A1+1");
+        sheet.setValue("C1", "=1+B1");
+        Assert.assertEquals("1", sheet.getValue("A1"));
+        Assert.assertEquals("2", sheet.getValue("B1"));
+        Assert.assertEquals("3", sheet.getValue("C1"));
+    }
+
 }
