@@ -170,4 +170,24 @@ public class MyRedisTests {
         Assert.assertEquals("two", transactionalKVStore.get("2"));
         Assert.assertEquals("three", transactionalKVStore.get("3"));
     }
+
+    @Test
+    public void testConcurrentTxn() {
+        final ConcurrentTxnKVStore concurrentTxnKVStore = new ConcurrentTxnKVStore();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                concurrentTxnKVStore.set("1", "one");
+            }
+        }).start();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                concurrentTxnKVStore.set("1", "one1");
+            }
+        }).start();
+
+        Assert.assertEquals("one", concurrentTxnKVStore.get("1"));
+    }
 }

@@ -247,6 +247,27 @@ class ConcurrentTxnKVStore extends TransactionalKVStore {
             writeLock.unlock();
         }
     }
+
+    @Override
+    public void set(String key, String value) {
+        Lock writeLock = readWriteLock.writeLock();
+        writeLock.lock();
+        try {
+            sleepThread();
+            super.set(key, value);
+        }
+        finally {
+            writeLock.unlock();
+        }
+    }
+
+    private void sleepThread() {
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
 
 class MyKVSTore implements IKVStore {
