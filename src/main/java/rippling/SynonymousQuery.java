@@ -3,8 +3,106 @@ package rippling;
 import java.util.*;
 import java.util.stream.Collectors;
 
+class SynonymChecker {
+
+    public Map<String, String> prepareSynonymMap2(List<String[]>  synonyms) {
+
+        Map<String, String> synonymMap = new HashMap<>();
+
+        Map<String, List<String>> map = new HashMap<>();
+        Set<String> allWords = new HashSet<>();
+
+        for(String[] list : synonyms) {
+
+            String w1 = list[0];
+            String w2 = list[1];
+
+            allWords.add(w1);
+            allWords.add(w2);
+
+            List<String> w1List = map.getOrDefault(w1, new ArrayList<>());
+            w1List.add(w2);
+            map.put(w1, w1List);
+
+            List<String> w2List = map.getOrDefault(w2, new ArrayList<>());
+            w2List.add(w1);
+            map.put(w2, w2List);
+        }
+
+        Set<String> visited = new HashSet<>();
+        List<String> wordList = new ArrayList<>(allWords);
+
+        while (!wordList.isEmpty()) {
+
+            String removedWord = wordList.remove(0);
+
+            if(visited.contains(removedWord))
+                continue;
+
+            Stack<String> stack = new Stack<>();
+            stack.add(removedWord);
+            Set<String> synonymSet = new HashSet<>();
+
+            while (!stack.isEmpty()) {
+                String pop  = stack.pop();
+                visited.add(pop);
+                synonymSet.add(pop);
+                for(String value : map.get(pop)) {
+                    if(!visited.contains(value)) {
+                        stack.add(value);
+                    }
+                }
+            }
+
+            String synWord = null;
+            for(String w : synonymSet) {
+                if(synWord == null)
+                    synWord = w;
+                synonymMap.put(w, synWord);
+            }
+        }
+        return synonymMap;
+    }
+
+    public Map<String, Boolean> checkSimilarity(Map<String, String> synonymMap, List<String[]> sentenceList) {
+
+        Map<String, Boolean> resultMap = new HashMap<>();
+
+        for(String[] sentences : sentenceList) {
+
+            String[] sentence1 = sentences[0].split(" ");
+            String[] sentence2 = sentences[1].split(" ");
+
+            if(sentence1.length != sentence2.length) {
+                resultMap.put(sentences[0] + " | " + sentences[1], false);
+                continue;
+            }
+
+            int i = 0;
+            boolean result = true;
+            while ( result && i < sentence1.length) {
+                if(!sentence1[i].equals(sentence2[i])) {
+                    if(synonymMap.containsKey(sentence1[i]) && synonymMap.containsKey(sentence2[i]) ) {
+                        if (!(synonymMap.get(sentence1[i]).equals(synonymMap.get(sentence2[i])))) {
+                            result = false;
+                        }
+                    }
+                    else {
+                        result = false;
+                    }
+                }
+                i++;
+            }
+            resultMap.put(sentences[0] +"|" + sentences[1], result);
+        }
+        return resultMap;
+    }
+}
+
 public class SynonymousQuery {
     public static void main(String[] args) {
+
+        SynonymChecker synonymChecker = new SynonymChecker();
 
         Map<String, List<String>> map = new HashMap<>();
 
@@ -43,7 +141,7 @@ public class SynonymousQuery {
         synonymList.add(new String[]{"m", "n"});
         synonymList.add(new String[]{"j", "z"});
 
-        Map<String, String> synonymMap = prepareSynonymMap2(synonymList);
+        Map<String, String> synonymMap = synonymChecker.prepareSynonymMap2(synonymList);
         System.out.println(synonymMap);
 
 
@@ -52,7 +150,7 @@ public class SynonymousQuery {
         synonymList.add(new String[]{"ratings", "rate"});
         synonymList.add(new String[]{"approval", "popularity"});
         synonymList.add(new String[]{"ratings", "rates"});
-        synonymMap = prepareSynonymMap2(synonymList);
+        synonymMap = synonymChecker.prepareSynonymMap2(synonymList);
         System.out.println(synonymMap);
 
 
@@ -66,12 +164,12 @@ public class SynonymousQuery {
         sentenceList.add(sentences3);
 
 
-        Map<String, Boolean> stringBooleanMap = checkSimilarity(synonymMap, sentenceList);
+        Map<String, Boolean> stringBooleanMap = synonymChecker.checkSimilarity(synonymMap, sentenceList);
         System.out.println(stringBooleanMap);
 
     }
 
-    private static Map<String, String> prepareSynonymMap2(List<String[]>  synonyms) {
+    /*private static Map<String, String> prepareSynonymMap2(List<String[]>  synonyms) {
 
         Map<String, String> synonymMap = new HashMap<>();
 
@@ -234,5 +332,5 @@ public class SynonymousQuery {
             return false;
 
         return true;
-    }
+    }*/
 }

@@ -42,8 +42,10 @@ class Pair implements Comparable<Pair> {
 }
 
 class CurrencyConverter {
-    Map<String, Map<String, Double>> table = new HashMap<>();
-    public void prepareAdjList(Currency[] currencies) {
+    //Map<String, Map<String, Double>> table = new HashMap<>();
+    public Map<String, Map<String, Double>> prepareAdjList(Currency[] currencies) {
+
+        Map<String, Map<String, Double>> table = new HashMap<>();
 
         for(Currency currency : currencies) {
             Map<String, Double> doubleMap = table.getOrDefault(currency.from, new HashMap<>());
@@ -57,9 +59,10 @@ class CurrencyConverter {
             table.put(currency.to, reverseDoubleMap);
         }
         System.out.println(table);
+        return table;
     }
 
-    public Double getExchangeRate(String source, String target) {
+    public Double getExchangeRate(String source, String target, Map<String, Map<String, Double>> table) {
 
         if(source.equals(target))
             return 1.0;
@@ -98,7 +101,7 @@ class CurrencyConverter {
         return 0.0;
     }
 
-    public Double getCheapestExchangeRate(String source, String target) {
+    public Double getCheapestExchangeRate(String source, String target,Map<String, Map<String, Double>> table) {
 
         if( !table.containsKey(source) || !table.containsKey(target))
             return 0.0;
@@ -170,11 +173,11 @@ public class ShortestPathCurrencyExchange {
         System.out.println(getExchangeRate("INR", "AUD", currMap));*/
 
         CurrencyConverter currencyConverter = new CurrencyConverter();
-        currencyConverter.prepareAdjList(curr);
-        Double exchangeRate = currencyConverter.getExchangeRate("USD", "JPY");
+        Map<String, Map<String, Double>> stringMapMap = currencyConverter.prepareAdjList(curr);
+        Double exchangeRate = currencyConverter.getExchangeRate("USD", "JPY", stringMapMap);
         System.out.println(exchangeRate);
 
-        exchangeRate = currencyConverter.getCheapestExchangeRate("USD", "JPY");
+        exchangeRate = currencyConverter.getCheapestExchangeRate("USD", "JPY", stringMapMap);
         System.out.println(exchangeRate);
     }
 }
