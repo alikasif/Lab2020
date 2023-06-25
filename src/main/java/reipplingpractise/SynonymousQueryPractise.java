@@ -74,6 +74,7 @@ class SynonymPractise {
             int i=0;
             boolean result = true;
             while (result && ++i < sentenceArray1.length) {
+
                 if(sentenceArray1[i].equals(sentenceArray2[i])) continue;
 
                 if( !synMap.containsKey(sentenceArray1[i]) || !synMap.containsKey(sentenceArray2[i])) {

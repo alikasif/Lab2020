@@ -64,14 +64,19 @@ class CurrencyExchange {
         while (!queue.isEmpty()) {
 
             Pair poll = queue.poll();
+
             if(poll.currency.equals(dest))
                 return poll.rate;
 
+            if (currMap.get(poll.currency).containsKey(dest))
+                return currMap.get(poll.currency).get(dest) * poll.rate;
+
             Map<String, Double> stringDoubleMap = currMap.get(poll.currency);
             for(Map.Entry<String, Double> entry : stringDoubleMap.entrySet()) {
+                Double newRate = poll.rate * entry.getValue();
                 if( !visited.contains(entry.getKey())) {
                     visited.add(entry.getKey());
-                    queue.add(new Pair(entry.getKey(), poll.rate * entry.getValue()));
+                    queue.add(new Pair(entry.getKey(), newRate));
                 }
             }
         }
@@ -88,17 +93,17 @@ class CurrencyExchange {
 
         PriorityQueue<Pair> priorityQueue = new PriorityQueue<>();
         priorityQueue.add(new Pair(source, 1.0));
-        Map<String, Double> minRatemap = new HashMap<>();
+        Map<String, Double> visitedNodeMap = new HashMap<>();
 
         while (!priorityQueue.isEmpty()) {
 
             Pair poll = priorityQueue.poll();
 
-            if(minRatemap.containsKey(poll.currency) && minRatemap.get(poll.currency) <= poll.rate)
+            if(visitedNodeMap.containsKey(poll.currency) && visitedNodeMap.get(poll.currency) <= poll.rate)
                 continue;
 
-            minRatemap.put(poll.currency, poll.rate);
-            currMap.get(source).put(poll.currency, poll.rate);
+            visitedNodeMap.put(poll.currency, poll.rate);
+            //currMap.get(source).put(poll.currency, poll.rate);
 
             Map<String, Double> stringDoubleMap = currMap.get(poll.currency);
 
@@ -109,13 +114,60 @@ class CurrencyExchange {
                 if(entry.getKey().equals(source))
                     continue;
 
-                if(minRatemap.containsKey(entry.getKey()) && minRatemap.get(entry.getKey()) > newRate)
-                    minRatemap.put(entry.getKey(), newRate );
+                if(visitedNodeMap.containsKey(entry.getKey()) && visitedNodeMap.get(entry.getKey()) > newRate)
+                    visitedNodeMap.put(entry.getKey(), newRate );
 
                 priorityQueue.add(new Pair(entry.getKey(), newRate));
             }
         }
-        return currMap.get(source).get(dest);
+        System.out.println(visitedNodeMap);
+        //return currMap.get(source).get(dest);
+        return visitedNodeMap.get(dest);
+    }
+
+    public Double getCheapestRateDijkstras(String source, String dest, Map<String, Map<String, Double>> currMap) {
+
+        if(source.equals(dest))
+            return 1.0;
+
+        if(!currMap.containsKey(source) || !currMap.containsKey(dest))
+            return 0.0;
+
+        PriorityQueue<Pair> priorityQueue = new PriorityQueue<>();
+        priorityQueue.add(new Pair(source, 1.0));
+
+        Map<String, Double> minRateMap = new HashMap<>();
+        for(String s : currMap.keySet())
+            minRateMap.put(s, Double.MAX_VALUE);
+        minRateMap.put(source, 1.0);
+
+        Set<String> visited = new HashSet<>();
+
+        while (!priorityQueue.isEmpty()) {
+
+            Pair poll = priorityQueue.poll();
+            visited.add(poll.currency);
+
+            Map<String, Double> stringDoubleMap = currMap.get(poll.currency);
+
+            for(Map.Entry<String, Double> entry : stringDoubleMap.entrySet()) {
+
+                if(entry.getKey().equals(source))
+                    continue;
+
+                Double newRate = poll.rate * entry.getValue();
+
+                if( newRate < minRateMap.get(entry.getKey()))
+                    minRateMap.put(entry.getKey(), newRate);
+
+                if(!visited.contains(entry.getKey())) {
+                    priorityQueue.add(new Pair(entry.getKey(), newRate));
+                }
+            }
+        }
+        System.out.println(minRateMap);
+        System.out.println(visited);
+        return minRateMap.get(dest);
     }
 }
 
@@ -124,9 +176,9 @@ public class CurrencyExchangePractise {
 
         List<Currency> currencies = new ArrayList<>();
         currencies.add(new Currency("USD", "JPY", 110.0));
-        currencies.add(new Currency("USD", "AUD", 1.0));
-        currencies.add(new Currency("AUD", "JPY", 4.0));
+        currencies.add(new Currency("USD", "AUD", 0.1));
         currencies.add(new Currency("USD", "MOS", 1.0));
+        currencies.add(new Currency("AUD", "JPY", 4.0));
         currencies.add(new Currency("MOS", "JPY", 2.0));
 
         CurrencyExchange currencyExchange = new CurrencyExchange();
@@ -137,6 +189,48 @@ public class CurrencyExchangePractise {
         System.out.println(rate);
 
         rate = currencyExchange.getCheapestRate("USD", "JPY", stringMapMap);
+        System.out.println(rate);
+
+        System.out.println("USD => AUD");
+        stringMapMap = currencyExchange.prepareCurrencyAdjList(currencies);
+        rate = currencyExchange.getCheapestRateDijkstras("USD", "AUD", stringMapMap);
+        System.out.println(rate);
+        stringMapMap = currencyExchange.prepareCurrencyAdjList(currencies);
+        rate = currencyExchange.getCheapestRate("USD", "AUD", stringMapMap);
+        System.out.println(rate);
+
+        System.out.println("USD => MOS");
+        rate = currencyExchange.getCheapestRateDijkstras("USD", "MOS", stringMapMap);
+        System.out.println(rate);
+        stringMapMap = currencyExchange.prepareCurrencyAdjList(currencies);
+        rate = currencyExchange.getCheapestRate("USD", "MOS", stringMapMap);
+        System.out.println(rate);
+
+        System.out.println("USD => INR");
+        rate = currencyExchange.getCheapestRateDijkstras("USD", "INR", stringMapMap);
+        System.out.println(rate);
+        stringMapMap = currencyExchange.prepareCurrencyAdjList(currencies);
+        rate = currencyExchange.getCheapestRate("USD", "INR", stringMapMap);
+        System.out.println(rate);
+
+        System.out.println("JPY => USD");
+        rate = currencyExchange.getCheapestRateDijkstras("JPY", "USD", stringMapMap);
+        System.out.println(rate);
+        stringMapMap = currencyExchange.prepareCurrencyAdjList(currencies);
+        rate = currencyExchange.getCheapestRate("JPY", "USD", stringMapMap);
+        System.out.println(rate);
+
+        System.out.println("MOS => AUD");
+        stringMapMap = currencyExchange.prepareCurrencyAdjList(currencies);
+        rate = currencyExchange.getShortestPath("MOS", "AUD", stringMapMap);
+        System.out.println(rate);
+
+
+        System.out.println("MOS => AUD");
+        rate = currencyExchange.getCheapestRateDijkstras("MOS", "AUD", stringMapMap);
+        System.out.println(rate);
+        stringMapMap = currencyExchange.prepareCurrencyAdjList(currencies);
+        rate = currencyExchange.getCheapestRate("MOS", "AUD", stringMapMap);
         System.out.println(rate);
 
     }

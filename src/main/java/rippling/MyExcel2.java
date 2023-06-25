@@ -122,6 +122,7 @@ class Sheet {
 
         public String evaluateValue() {
             value = setRecursively();
+            notifyObservers();
             return value;
         }
 
@@ -133,7 +134,7 @@ class Sheet {
                 for(String sv : split) {
                     if(sv.matches("[A-Z][0-9]*+")) {
                         Cell cell = sheetMap.get(sv);
-                        value = value + Integer.parseInt(cell.evaluateValue()); // DFS
+                        value = value + Integer.parseInt(cell.value); // DFS
                     }
                     else {
                         value = value + Integer.parseInt(sv);
@@ -148,6 +149,7 @@ class Sheet {
 
         private void notifyObservers() {
             for(Cell c : observers) {
+                System.out.println("notifying from "+ this.colName + " to "+ c.colName);
                 c.evaluateValue();
             }
         }
@@ -160,6 +162,7 @@ public class MyExcel2 {
         sheet.set("A", "1");
         sheet.set("B", "2");
         System.out.println("A => " +sheet.get("A"));
+        System.out.println("B => " +sheet.get("B"));
         sheet.set("C", "=1+A");
         System.out.println("C => " +sheet.get("C"));
         sheet.set("D", "=C+B");
@@ -169,13 +172,16 @@ public class MyExcel2 {
         System.out.println("D => " +sheet.get("D"));
 
         sheet.set("E", "=D+C");
+        sheet.set("F", "=E");
         System.out.println("E => " +sheet.get("E"));
+        System.out.println("F => " +sheet.get("F"));
+        System.out.println("resetting C");
         sheet.set("C", "=10+B");
         System.out.println("C => " +sheet.get("C"));
-        System.out.println("E => " +sheet.get("E"));
         System.out.println("D => " +sheet.get("D"));
-        sheet.set("F", "=10+1");
+        System.out.println("E => " +sheet.get("E"));
         System.out.println("F => " +sheet.get("F"));
+
         sheet.toString();
     }
 }
