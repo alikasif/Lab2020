@@ -4,13 +4,34 @@ import java.util.*;
 
 class SynonymPractise {
 
+    public  Map<String, String> prepareSimpleSynMap(List<String[]> synonyms) {
+        Map<String, String> synMap = new HashMap<>();
+        for(String[] strings : synonyms) {
+
+            String w1 = strings[0];
+            String w2 = strings[1];
+            if(synMap.containsKey(w1) || synMap.containsKey(w2)) {
+                String v = synMap.get(w1);
+                if(v == null)
+                    v = synMap.get(w2);
+                synMap.put(w1, v);
+                synMap.put(w2, v);
+            }
+            else {
+                synMap.put(w1, w1);
+                synMap.put(w2, w1);
+            }
+        }
+        return synMap;
+    }
+
     public  Map<String, String> prepareSynMap(List<String[]> synonyms){
 
         Map<String, String> synMap = new HashMap<>();
 
         Map<String, List<String>> map = new HashMap<>();
-
         Set<String> allWords = new HashSet<>();
+
         for(String[] arr: synonyms) {
             String syn1 = arr[0];
             String syn2 = arr[1];
@@ -41,8 +62,8 @@ class SynonymPractise {
                 for(String s : map.get(pop)) {
                     if(!synSet.contains(s)) {
                         synSet.add(s);
-                        allSynWords.remove(s);
                         stack.add(s);
+                        allSynWords.remove(s);
                     }
                 }
             }
@@ -135,6 +156,10 @@ public class SynonymousQueryPractise {
 
         Map<String, Boolean> stringBooleanMap = synonymPractise.checkSimilarity(sentenceList, stringStringMap);
         System.out.println(stringBooleanMap);
+
+        String[] split = sentence1.get(0).split(" ");
+        Arrays.sort(split, String.CASE_INSENSITIVE_ORDER);
+        System.out.println(Arrays.toString(split));
 
     }
 }

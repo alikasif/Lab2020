@@ -12,8 +12,8 @@ class Cell {
         observers.add(cell);
     }
 
-    public void setRawValue(String value, Map<String, Cell> sheetMap) {
-
+    public void setRawValue( Map<String, Cell> sheetMap) {
+        String value = rawValue;
         if(value.startsWith("=")) { // A = 1+B;
             String[] split = value.substring(1).split("\\+");
             for(String s : split) {
@@ -22,8 +22,8 @@ class Cell {
                     if(!sheetMap.containsKey(s))
                         throw new IllegalArgumentException("cell not found "+s);
 
-                    if(this.observers.contains(sheetMap.get(s)))
-                        throw new IllegalStateException("cycle detected " + s +" "+cellName);
+                    if(this.observers.contains(sheetMap.get(s))) // A : =A
+                        throw new IllegalStateException("cycle detected " + s +" " + cellName);
 
                     sheetMap.get(s).addObserver(this);
                 }
@@ -112,7 +112,7 @@ class ExcelSheet {
         setValue(cellName);
         notifyObservers(cellName);*/
 
-        cell.setRawValue(value, sheetMap);
+        cell.setRawValue(sheetMap);
         cell.setValue(sheetMap);
     }
 
@@ -261,8 +261,8 @@ public class ExcelPractise {
         System.out.println("E => " +excelSheet.get("E"));
         System.out.println("F => " +excelSheet.get("F"));
 
-        /*excelSheet.set("F", "=10+1");
-        System.out.println("F => " +excelSheet.get("F"));*/
+        excelSheet.set("F", "=10+1+5");
+        System.out.println("F => " +excelSheet.get("F"));
 
         excelSheet.toString();
 

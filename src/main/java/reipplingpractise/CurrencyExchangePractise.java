@@ -142,11 +142,13 @@ class CurrencyExchange {
         minRateMap.put(source, 1.0);
 
         Set<String> visited = new HashSet<>();
+        List<String> visitedList = new ArrayList<>();
 
         while (!priorityQueue.isEmpty()) {
 
             Pair poll = priorityQueue.poll();
             visited.add(poll.currency);
+            visitedList.add(poll.currency);
 
             Map<String, Double> stringDoubleMap = currMap.get(poll.currency);
 
@@ -165,8 +167,9 @@ class CurrencyExchange {
                 }
             }
         }
-        System.out.println(minRateMap);
-        System.out.println(visited);
+        System.out.println("minRateMap : "+minRateMap);
+        System.out.println("visited : "+visited);
+        System.out.println("visitedList : "+visitedList);
         return minRateMap.get(dest);
     }
 }
@@ -231,6 +234,14 @@ public class CurrencyExchangePractise {
         System.out.println(rate);
         stringMapMap = currencyExchange.prepareCurrencyAdjList(currencies);
         rate = currencyExchange.getCheapestRate("MOS", "AUD", stringMapMap);
+        System.out.println(rate);
+
+        currencies.clear();
+        currencies.add(new Currency("USD", "JPY", 110.0));
+        currencies.add(new Currency("USD", "AUD", 1.45));
+        currencies.add(new Currency("JPY", "GBP", 0.0070));
+        stringMapMap = currencyExchange.prepareCurrencyAdjList(currencies);
+        rate = currencyExchange.getCheapestRateDijkstras("GBP", "AUD", stringMapMap);
         System.out.println(rate);
 
     }
