@@ -28,6 +28,14 @@ class Pair implements Comparable<Pair>{
     public int compareTo(Pair o) {
         return Double.compare(this.rate, o.rate);
     }
+
+    @Override
+    public String toString() {
+        return "Pair{" +
+                "currency='" + currency + '\'' +
+                ", rate=" + rate +
+                '}';
+    }
 }
 
 class CurrencyExchange {
@@ -147,8 +155,11 @@ class CurrencyExchange {
         while (!priorityQueue.isEmpty()) {
 
             Pair poll = priorityQueue.poll();
+
             visited.add(poll.currency);
-            visitedList.add(poll.currency);
+
+            //System.out.print(poll+" => ");
+            //visitedList.add(poll.currency);
 
             Map<String, Double> stringDoubleMap = currMap.get(poll.currency);
 
@@ -162,14 +173,15 @@ class CurrencyExchange {
                 if( newRate < minRateMap.get(entry.getKey()))
                     minRateMap.put(entry.getKey(), newRate);
 
-                if(!visited.contains(entry.getKey())) {
+                if (!visited.contains(entry.getKey())) {
                     priorityQueue.add(new Pair(entry.getKey(), newRate));
                 }
             }
         }
+        System.out.println();
         System.out.println("minRateMap : "+minRateMap);
-        System.out.println("visited : "+visited);
-        System.out.println("visitedList : "+visitedList);
+        //System.out.println("visited : "+visited);
+        //System.out.println("visitedList : "+visitedList);
         return minRateMap.get(dest);
     }
 }
@@ -188,9 +200,9 @@ public class CurrencyExchangePractise {
         Map<String, Map<String, Double>> stringMapMap = currencyExchange.prepareCurrencyAdjList(currencies);
         System.out.println(stringMapMap);
 
+        System.out.println("USD => JPY");
         Double rate = currencyExchange.getShortestPath("USD", "JPY", stringMapMap);
         System.out.println(rate);
-
         rate = currencyExchange.getCheapestRate("USD", "JPY", stringMapMap);
         System.out.println(rate);
 
@@ -227,7 +239,6 @@ public class CurrencyExchangePractise {
         stringMapMap = currencyExchange.prepareCurrencyAdjList(currencies);
         rate = currencyExchange.getShortestPath("MOS", "AUD", stringMapMap);
         System.out.println(rate);
-
 
         System.out.println("MOS => AUD");
         rate = currencyExchange.getCheapestRateDijkstras("MOS", "AUD", stringMapMap);

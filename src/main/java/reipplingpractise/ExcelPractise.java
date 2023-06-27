@@ -12,7 +12,7 @@ class Cell {
         observers.add(cell);
     }
 
-    public void setRawValue( Map<String, Cell> sheetMap) {
+    public void updateObservers(Map<String, Cell> sheetMap) {
         String value = rawValue;
         if(value.startsWith("=")) { // A = 1+B;
             String[] split = value.substring(1).split("\\+");
@@ -112,7 +112,7 @@ class ExcelSheet {
         setValue(cellName);
         notifyObservers(cellName);*/
 
-        cell.setRawValue(sheetMap);
+        cell.updateObservers(sheetMap);
         cell.setValue(sheetMap);
     }
 

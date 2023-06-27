@@ -70,8 +70,6 @@ interface ITransactionalKVStore extends IKVStore2 {
 
 class Transaction extends SimpleKVStore{
     Set<String> deletedKeys = new HashSet<>();
-    IKVStore2 kvStore;
-
     public Transaction(){
         super();
     }
