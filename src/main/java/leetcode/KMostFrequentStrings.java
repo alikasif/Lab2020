@@ -1,7 +1,5 @@
 package leetcode;
 
-import org.apache.hadoop.yarn.webapp.hamlet2.Hamlet;
-
 import java.io.Console;
 import java.util.HashMap;
 import java.util.Map;

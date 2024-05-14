@@ -1,7 +1,5 @@
 package salesforce;
 
-import scala.Int;
-
 import java.util.*;
 
 public class MinHeightTree {

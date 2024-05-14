@@ -1,7 +1,5 @@
 package reipplingpractise;
 
-import org.apache.commons.lang3.NotImplementedException;
-
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -136,12 +134,12 @@ class TransactionalKVStore implements ITransactionalKVStore {
 
     @Override
     public Set<Map.Entry<String, String>> getAllEntries() {
-        throw new NotImplementedException("getAllEntries()");
+        throw new RuntimeException("getAllEntries()");
     }
 
     @Override
     public Map<String, String> getInternalMapCopy() {
-        throw  new NotImplementedException("getInternalMapCopy()");
+        throw  new RuntimeException("getInternalMapCopy()");
     }
 
     @Override
@@ -259,12 +257,12 @@ class TransactionalKVStore2 implements ITransactionalKVStore {
 
     @Override
     public Set<Map.Entry<String, String>> getAllEntries() {
-        throw new NotImplementedException("getAllEntries()");
+        throw new RuntimeException("getAllEntries()");
     }
 
     @Override
     public Map<String, String> getInternalMapCopy() {
-        throw  new NotImplementedException("getInternalMapCopy()");
+        throw  new RuntimeException("getInternalMapCopy()");
     }
 
     @Override

@@ -1,6 +1,5 @@
 package google2022;
 
-import scala.Tuple1;
 
 import java.util.Comparator;
 import java.util.PriorityQueue;

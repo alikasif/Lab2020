@@ -1,7 +1,5 @@
 package google2022;
 
-import scala.Int;
-
 import java.util.PriorityQueue;
 
 public class RemoveStonesToMinimizeTotal {

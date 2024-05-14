@@ -1,7 +1,5 @@
 package leetcode;
 
-import scala.Int;
-
 import java.util.*;
 import java.util.stream.Stream;
 

@@ -1,7 +1,5 @@
     package google2022;
 
-    import scala.Char;
-
     public class LongestCommonPrefix {
 
         public static void main(String[] args) {

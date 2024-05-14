@@ -1,8 +1,6 @@
 package salesforce;
 
-
 import leetcode.Node;
-import scala.Int;
 
 import java.util.ArrayList;
 import java.util.List;
