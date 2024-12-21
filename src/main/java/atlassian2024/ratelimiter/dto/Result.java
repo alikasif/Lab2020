@@ -1,6 +1,11 @@
 package atlassian2024.ratelimiter.dto;
 
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class Result {
 
     public enum ResultEnum{
@@ -13,14 +18,18 @@ public class Result {
         this.requestTime = reqTime;
     }
 
-    ResultEnum result;
-    Long requestTime;
+    private ResultEnum result;
+    private Long requestTime;
+    private String resourcePath;
+    private String id;
 
     @Override
     public String toString() {
         return "Result{" +
                 "result=" + result +
                 ", requestTime=" + requestTime +
+                ", resourcePath='" + resourcePath + '\'' +
+                ", id='" + id + '\'' +
                 '}';
     }
 }

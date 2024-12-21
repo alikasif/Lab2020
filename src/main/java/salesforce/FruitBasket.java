@@ -5,13 +5,96 @@ import java.util.*;
 public class FruitBasket {
     public static void main(String[] args) {
 
-        int[] fruits = {3,3,3,1,2,1,1,2,3,3,4};
-       // int[] fruits = {1,3,3,3,2,2,2,2,2,3,3,4};
+        int[] fruits = {3,2,3,1,2,1,1,2,3,3,4};
+        //int[] fruits = {1,2,3,1,2,3,1,2,3,1,2};
+       //int[] fruits = {1,3,3,1,2,2};//,2,2,2,3,3,4};
         //int[] fruits = {1,2,1};
         //int[] fruits = {1,0,1,4,1,4,1,2,3};
 
         //int[] fruits = {1, 1, 6, 5, 6, 6, 1, 1, 1, 1};
-        try2(fruits);
+        //try2(fruits);
+        //try3(fruits);
+        System.out.println(totalFruit(fruits));
+    }
+
+    static int totalFruit2(int[] tree) {
+        Map<Integer, Integer> count = new HashMap<>();
+        int i = 0, j;
+        int max = 0;
+        for (j = 0; j < tree.length; ++j) {
+
+            count.put(tree[j], j);
+
+            if (count.size() > 2) {
+                int fruit = tree[i];
+                System.out.println("size " + (j-i));
+
+                i = count.remove(fruit);
+                System.out.println("i :: " +i);
+            }
+            System.out.println(count);
+        }
+        System.out.println(max);
+        System.out.println( j - i);
+        return j-i;
+    }
+
+
+    // sliding window of size 2
+    static int totalFruit(int[] tree) {
+        Map<Integer, Integer> count = new HashMap<>();
+        int i = 0, j;
+        int max = 0;
+        for (j = 0; j < tree.length; ++j) {
+            System.out.println(i + "|" + j);
+            count.put(tree[j], count.getOrDefault(tree[j], 0) + 1);
+            if (count.size() > 2) {
+                count.put(tree[i], count.get(tree[i]) - 1);
+                if(count.get(tree[i]) == 0)
+                    count.remove(tree[i]);
+                i++;
+                //count.remove(tree[i++], 0);
+            }
+            System.out.println(count);
+        }
+        System.out.println(max);
+        return j - i;
+    }
+
+    static void try3(int[] fruits) {
+
+        int basket1 = fruits[0];
+        int index1 = 0;
+        int index2 = -1;
+        int basket2 = -1;
+        int c = 1;
+        int start = 0;
+        int maxc = Integer.MIN_VALUE;
+
+        for (int i = 1; i < fruits.length; i++) {
+            if (fruits[i] == basket1) {
+                c++;
+            }
+            else {
+                if (basket2 == -1) {
+                    basket2 = fruits[i];
+                    index2 = i;
+                    c++;
+                }
+                else if (fruits[i] == basket2) {
+                    c++;
+                }
+                else {
+                    maxc = Math.max(maxc, (i-start));
+                    basket1 = basket2;
+                    index1 = index2;
+                    basket2 = fruits[i];
+                    index2 = i;
+                    start = index1;
+                }
+            }
+        }
+        System.out.println(maxc);
     }
 
     static void try2(int[] fruits){

@@ -1,21 +1,18 @@
 package atlassian2024.ratelimiter.policy;
 
+import lombok.Getter;
+
 public abstract class RateLimitConfig {
 
+    @Getter
     final private int numRequest;
+
+    @Getter
     final private int windowLength;
 
     protected RateLimitConfig(int numRequest, int windowLength) {
         this.numRequest = numRequest;
         this.windowLength = windowLength;
-    }
-
-    public int getNumRequest() {
-        return numRequest;
-    }
-
-    public int getWindowLength() {
-        return windowLength;
     }
 
     public abstract long getWindowKey(long millisTime);

@@ -9,6 +9,5 @@ public class SlidingWindowSecondConfig extends RateLimitConfig {
     @Override
     public long getWindowKey(long millisTime) {
         return millisTime - (getWindowLength() * 1000L);
-        //return Instant.now().minusSeconds(getWindowLength()).toEpochMilli();
     }
 }

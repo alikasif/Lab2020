@@ -25,6 +25,7 @@ public class ReverseLLInPair {
         }
         return length;
     }
+
     //utility function to reverse k nodes in the list
     static Node reverseKNodes(Node head,int k) {
         if(head == null||head.next == null) return head;
@@ -53,6 +54,7 @@ public class ReverseLLInPair {
         }
         return dummyHead.next;
     }
+
     //utility function to print the list
     static void printLinkedList(Node head) {
         while(head.next != null) {

@@ -9,8 +9,8 @@ public class SorroundedIslands {
         int[][] mat ={
                 {1,1,1,1,1},
                 {1,0,0,0,1},
-                {1,0,1,1,1},
-                {1,1,1,1,1}};
+                {1,0,1,0,1},
+                {1,0,1,1,1}};
 
         int i=0;
         for(int j=0;j<mat.length;j++) {

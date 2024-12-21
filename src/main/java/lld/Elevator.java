@@ -17,7 +17,14 @@ class ElevatorHandler {
             System.out.println("Lift is already at floor...Door Opening");
         }
 
-        if(elevator.direction == Direction.UP){
+        if(floor < elevator.currentfloor ){
+            elevator.queueDown.add(floor);
+        }
+        else{
+            elevator.queueUp.add(floor);
+        }
+
+        /*if(elevator.direction == Direction.UP){
             if(floor < elevator.currentfloor ){
                 elevator.queueDown.add(floor);
             }
@@ -40,7 +47,7 @@ class ElevatorHandler {
             else if(floor > elevator.currentfloor){
                 elevator.queueUp.add(floor);
             }
-        }
+        }*/
     }
 }
 
@@ -66,7 +73,6 @@ class AutomatedElevator {
         this.direction = Direction.IDLE;
         this.queueDown = new PriorityQueue<>((a,b)->(b-a));      // 4 3 2
         this.queueUp = new PriorityQueue<>((a,b)->(a-b));        // 5 7 8
-
     }
 
     public synchronized static AutomatedElevator getElevator(int id)
@@ -90,7 +96,11 @@ interface IElevatorServer {
 
 class ElevatorServer implements Runnable, IElevatorServer {
 
-    final static AutomatedElevator elevator = AutomatedElevator.getElevator(1);
+    final AutomatedElevator elevator;// = AutomatedElevator.getElevator(1);
+
+    public ElevatorServer(int id) {
+        elevator = AutomatedElevator.getElevator(id);
+    }
 
     /**
      * Method is continuously serving the lift request
@@ -109,11 +119,13 @@ class ElevatorServer implements Runnable, IElevatorServer {
                     if(!elevator.queueUp.isEmpty()){
                         elevator.targetFloor = elevator.queueUp.peek();
                     }
-                }else if(elevator.direction == Direction.DOWN){
+                }
+                else if(elevator.direction == Direction.DOWN){
                     if(!elevator.queueDown.isEmpty()){
                         elevator.targetFloor = elevator.queueDown.peek();
                     }
-                }else{ // idle case
+                }
+                else{ // idle case
                     if(!elevator.queueUp.isEmpty()){
                         elevator.targetFloor = elevator.queueUp.peek();
                     }else if(!elevator.queueDown.isEmpty()){
@@ -135,17 +147,16 @@ class ElevatorServer implements Runnable, IElevatorServer {
                 }
 
 
-                // below code will check am i on target floor
-                if(elevator.queueDown.isEmpty() && elevator.queueUp.isEmpty()){
+                // below code will check if elevator is on target floor
+                if(elevator.queueDown.isEmpty() && elevator.queueUp.isEmpty()) {
                     System.out.println("Lift is Stationary "+elevator.currentfloor);
-                }else{
+                }
+                else {
                     // handle up
                     if(elevator.currentfloor < elevator.targetFloor){
-                        startMovingUp(elevator);
                         elevator.currentfloor++;
                     }
                     else if(elevator.currentfloor > elevator.targetFloor){
-                        startMovingDown(elevator);
                         elevator.currentfloor--;
                     }
                     // Reached to Floor
@@ -203,12 +214,13 @@ class ElevatorServer implements Runnable, IElevatorServer {
 class Elevator {
     public static void main(String[] args) throws Exception {
 
+        // Create/Get the instance of Elevator
+        AutomatedElevator elevator = AutomatedElevator.getElevator(1);
+
         // Start the elevator server
-        ElevatorServer server = new ElevatorServer();
+        ElevatorServer server = new ElevatorServer(elevator.elevatorId);
         new Thread(server).start() ;
 
-        // Get the instance of Elevator
-        AutomatedElevator elevator = AutomatedElevator.getElevator(1);
 
         // Move Elevator
         ElevatorHandler.goToFloor(elevator, 2);

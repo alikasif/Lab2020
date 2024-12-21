@@ -6,6 +6,7 @@ public class Node {
     public Node prev;
     public Node child;
     public Integer value;
+    public Integer maxSum;
     public String sval;
     public Node left;
     public Node right;
@@ -20,8 +21,8 @@ public class Node {
 
     @Override
     public String toString() {
-        String s= "";
         return value+"";
+
 
         /*if(value != null)
          s= s+ "Node {" +  " value=" + value ;
